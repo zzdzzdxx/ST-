@@ -1,17 +1,2004 @@
-{
-    "id": "758d86a0-ac63-426f-9d4a-d9864fbfd12b",
-    "scriptName": "末日堡垒状态栏_V3.2",
-    "disabled": false,
-    "runOnEdit": true,
-    "findRegex": "/<StatusPlaceHolderImpl\\/>/g",
-    "trimStrings": [],
-    "replaceString": "```html\n<!DOCTYPE html>\n<html lang=\"zh-CN\">\n<head>\n    <meta charset=\"UTF-8\">\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n    <title>末日堡垒状态栏V2=3.2</title>\n    <link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css\">\n    <style>\n        /* --- 基础变量与主题 (紧凑化、字体的统一、字号增大) --- */\n        :root {\n            /* 亮色主题 (默认) */\n            --c-main: #93011e;\n            --c-sub: #F8C3CD;\n            --c-accent: #e7234a;\n            --c-bg-base: #FFF0F5;\n            --c-text-dark: #4a000f;\n            --c-text-light: #fff;\n            --c-panel-bg: rgba(255,255,255,0.5);\n            --c-panel-border: rgba(255,255,255,0.6);\n            --c-tab-bg: rgba(255,255,255,0.4);\n            --c-tag-bg: rgba(255,255,255,0.8);\n            --c-dropdown-bg: rgba(255,255,255,0.95);\n            --c-melody-bg: rgba(255,255,255,0.5);\n\n            /* 动态背景色 */\n            --dynamic-bg-1: rgba(255, 240, 245, 0.85);\n            --dynamic-bg-2: rgba(248, 195, 205, 0.6);\n\n            /* 统一字体为楷体 */\n            --font-body: 'KaiTi', 'STKaiti', serif, system-ui, -apple-system;\n\n            /* --- 5级响应式字号阶梯 (Type Scale) --- */\n            --fs-xl: clamp(10px, 3.5cqw, 16px); /* L1: 重点标题 (如：Tab/苏瑶、苏双双) */\n            --fs-lg: clamp(12px, 3cqw, 18px);   /* L2: 角色姓名“瑶瑶”、极重要数值 */\n            --fs-md: clamp(10px, 2.5cqw, 16px); /* L3: 数据标签、模块标题、强调文字 */\n            --fs-md-accent: clamp(10px, 2.5cqw, 16px); /* L3.1: 特殊颜色数值 */\n            --fs-sm: clamp(9px, 2.2cqw, 14px); /* L4: 变量/标准正文/次要信息 */\n            --fs-sm-label: clamp(9px, 2.2cqw, 14px); /* L4.1: 固定名称 */\n            --fs-xs: clamp(10px, 1.8cqw, 14px); /* L5: 微型角标/小标签/ 提示/Tooltip */\n\n            --radius-lg: clamp(12px, 3cqw, 20px);\n            --radius-md: clamp(8px, 2cqw, 12px);\n            --radius-sm: clamp(4px, 1cqw, 8px);\n\n            /* 间距调整为3px */\n            --space-lg: 6px;\n            --space-md: 4px;\n            --space-sm: 3px;\n\n            --shadow-pearl:\n                inset 0 0 10px rgba(255,255,255,0.8),\n                inset 0 0 20px rgba(248,195,205,0.3),\n                0 4px 15px rgba(147,1,30,0.1);\n            --shadow-text-glow: 0 0 8px rgba(231,35,74,0.6);\n\n            --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);\n        }\n\n        /* 暗色主题 */\n        .mvu-monitor-wrapper.theme-dark {\n            --c-main: #ff8fa3;\n            --c-sub: #590d22;\n            --c-accent: #ff4d6d;\n            --c-bg-base: #1a050a;\n            --c-text-dark: #fff0f3;\n            --c-text-light: #fff;\n            --c-panel-bg: rgba(20, 5, 10, 0.6);\n            --c-panel-border: rgba(255, 77, 109, 0.3);\n            --c-tab-bg: rgba(40, 10, 20, 0.6);\n            --c-tag-bg: rgba(30, 5, 15, 0.8);\n            --c-dropdown-bg: rgba(20, 5, 10, 0.95);\n            --c-melody-bg: rgba(30, 5, 15, 0.5);\n\n            --shadow-pearl:\n                inset 0 0 10px rgba(255,77,109,0.2),\n                inset 0 0 20px rgba(0,0,0,0.8),\n                0 4px 15px rgba(0,0,0,0.5);\n            --shadow-text-glow: 0 0 10px rgba(255,77,109,0.8);\n        }\n\n        /* --- 全局重置与容器 --- */\n        .mvu-monitor-wrapper {\n            container-type: inline-size;\n            width: 100%;\n            max-width: 1000px;\n            margin: 5px auto;\n            font-family: var(--font-body);\n            color: var(--c-text-dark);\n            line-height: 1.3;\n            box-sizing: border-box;\n            position: relative;\n            overflow: hidden;\n            border-radius: var(--radius-lg);\n            background: linear-gradient(135deg, var(--dynamic-bg-1), var(--dynamic-bg-2));\n            backdrop-filter: blur(12px);\n            -webkit-backdrop-filter: blur(12px);\n            /* 边框呼吸特效：暗金与暗红交替，5秒周期 */\n            border: 2px solid #8b0000;\n            box-shadow: var(--shadow-pearl);\n            padding: 8px; /* 边距翻倍 */\n            transition: background 1s ease;\n            animation: border-breathe 5s infinite ease-in-out;\n        }\n\n        @keyframes border-breathe {\n            0%, 100% { border-color: #8b0000; box-shadow: var(--shadow-pearl), 0 0 8px #8b0000; }\n            50% { border-color: #b8860b; box-shadow: var(--shadow-pearl), 0 0 15px #b8860b; }\n        }\n\n        .mvu-monitor-wrapper * { box-sizing: border-box; }\n\n        /* --- 蕾丝边框装饰 --- */\n        .lace-border {\n            position: absolute;\n            top: 0; left: 0; right: 0; bottom: 0;\n            pointer-events: none;\n            z-index: 0;\n            background-image: url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"20\" viewBox=\"0 0 40 20\"><path d=\"M0,20 Q10,0 20,20 Q30,0 40,20\" fill=\"none\" stroke=\"rgba(248,195,205,0.5)\" stroke-width=\"2\"/></svg>');\n            background-repeat: repeat-x;\n            background-position: top;\n            opacity: 0.7;\n        }\n\n        /* --- 粒子动画 --- */\n        .particles {\n            position: absolute;\n            top: 0; left: 0; width: 100%; height: 100%;\n            pointer-events: none;\n            z-index: 0;\n            overflow: hidden;\n        }\n        .particle {\n            position: absolute;\n            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(248,195,205,0) 70%);\n            border-radius: 50%;\n            animation: float-up linear infinite;\n        }\n        @keyframes float-up {\n            0% { transform: translateY(100%) scale(0.5); opacity: 0; }\n            50% { opacity: 0.6; }\n            100% { transform: translateY(-20px) scale(1.2); opacity: 0; }\n        }\n\n        /* --- 布局通用类 --- */\n        .flex-row { display: flex; align-items: center; gap: var(--space-sm); }\n        .flex-col { display: flex; flex-direction: column; gap: var(--space-sm); }\n        .z-content { position: relative; z-index: 1; }\n\n        /* --- 第一行：全局信息栏 (狭窄) --- */\n        .global-bar {\n            display: flex;\n            flex-wrap: wrap;\n            justify-content: space-between;\n            align-items: center;\n            background: var(--c-panel-bg);\n            padding: var(--space-sm) var(--space-md);\n            border-radius: var(--radius-md);\n            font-size: var(--fs-xs);\n            margin-bottom: var(--space-sm);\n            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);\n            border: 1px solid var(--c-panel-border);\n        }\n        .global-item { display: flex; align-items: center; gap: 4px; }\n        .global-item i { color: var(--c-main); }\n        .min-btn { cursor: pointer; color: var(--c-main); transition: var(--transition-base); padding: 0 4px; }\n        .min-btn:hover { transform: scale(1.1); }\n\n        .mvu-monitor-wrapper.minimized .hide-on-min { display: none !important; }\n        .mvu-monitor-wrapper.minimized .global-bar { cursor: pointer; }\n\n        /* --- 第二行：顶部导航 Tab --- */\n        .nav-tabs {\n            display: flex;\n            gap: var(--space-sm);\n            margin-bottom: var(--space-sm);\n            border-bottom: 2px solid var(--c-panel-border);\n            padding-bottom: var(--space-sm);\n            overflow-x: auto;\n            scrollbar-width: none;\n        }\n        .nav-tabs .flex-row:last-child {\n            margin-left: auto;\n        }\n        .nav-tabs::-webkit-scrollbar { display: none; }\n        .tab-btn {\n            padding: 0 clamp(8px, 1.5cqw, 12px); /* 减少高度 */\n            border-radius: var(--radius-lg);\n            background: var(--c-tab-bg);\n            border: 1px solid var(--c-panel-border);\n            color: var(--c-main);\n            font-weight: bold;\n            font-size: var(--fs-xl);\n            cursor: pointer;\n            transition: var(--transition-base);\n            white-space: nowrap;\n            box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);\n        }\n        .tab-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }\n        .tab-btn.active {\n            background: var(--c-main);\n            color: var(--c-text-light);\n            box-shadow: var(--shadow-text-glow);\n            border-color: var(--c-accent);\n        }\n\n        /* --- 第三区块：核心仪表盘 (左图右数据) --- */\n        .core-dashboard {\n            background: var(--c-panel-bg);\n            border-radius: var(--radius-md);\n            padding: var(--space-md);\n            border: 1px solid var(--c-panel-border);\n            box-shadow: 0 2px 8px rgba(0,0,0,0.1);\n            display: grid;\n            grid-template-columns: auto 1fr;\n            grid-template-areas: \n                \"img data\"\n                \"img evo\";\n            gap: 3px; /* 缩小左右间距 */\n            margin-bottom: var(--space-sm);\n        }\n        \n        /* 增加特定区块距离边框的距离 */\n        .core-dashboard, #melody-wrapper-div, #c-equip-details, #c-fetish-details {\n            margin-left: 4px;\n            margin-right: 4px;\n        }\n        \n        /* 左侧图片展示区 */\n        .core-image-zone {\n            grid-area: img;\n            width: calc(26cqw - 70px); /* 增加宽度，给图片腾出空间 */\n            min-width: 70px; /* 设定一个极限最小宽度防止崩溃 */\n            display: flex;\n            justify-content: center;\n            align-items: center;\n            border-radius: var(--radius-md);\n            border: 2px solid rgba(248,195,205,0.8);\n            box-shadow: var(--shadow-pearl);\n            background: rgba(0,0,0,0.05);\n            overflow: hidden;\n            cursor: pointer;\n            position: relative;\n        }\n        .core-image-zone img {\n            width: 100%;\n            height: 100%;\n            object-fit: cover; /* 填满容器，上下不留白，保持原始比例裁剪 */\n            transition: opacity 0.2s;\n        }\n        .core-image-zone:active img { opacity: 0.8; }\n\n        /* 右侧数据区 */\n        .core-data-zone {\n            grid-area: data;\n            display: flex;\n            flex-direction: column;\n            justify-content: flex-start; /* 向上对齐 */\n            gap: 3px; /* 极小间距 */\n            min-width: 0;\n        }\n        \n        /* 灵动岛气泡样式 */\n        .island-pill {\n            background: var(--c-tag-bg);\n            border: 1px solid var(--c-panel-border);\n            border-radius: 20px;\n            padding: 1px 6px; /* 减小内边距 */\n            display: inline-flex;\n            align-items: center;\n            gap: 3px; /* 减小间距 */\n            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);\n            white-space: nowrap;\n        }\n        \n        /* 行1：A区 */\n        .dash-row-1 {\n            display: flex;\n            flex-wrap: wrap; /* 允许换行以适配手机 */\n            justify-content: space-between;\n            align-items: center;\n            gap: var(--space-sm);\n        }\n        \n        /* 进度条组合 */\n        .progress-row {\n            display: flex;\n            align-items: center;\n            gap: 1cqw; /* 使用容器单位 */\n            width: 100%;\n            position: relative;\n        }\n        .progress-label-group {\n            display: flex;\n            align-items: baseline;\n            gap: 2px;\n            width: auto; /* 移除固定容器单位宽度，改为自适应 */\n            min-width: max-content; /* 确保文字内容完整显示，不被压缩换行 */\n            flex-shrink: 0;\n            font-size: clamp(10px, 2.2cqw, 17px); /* 进一步减小下限，增强缩放能力 */\n            font-weight: bold;\n            color: var(--c-main);\n            white-space: nowrap;\n        }\n        .progress-track {\n            flex-grow: 1; height: 5px;\n            min-width: 8px; /* 允许进度条在极窄屏幕下缩短，把空间让给数值 */\n            background: rgba(248,195,205,0.3);\n            border-radius: 3px;\n            overflow: hidden;\n            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);\n        }\n        .progress-fill {\n            height: 100%;\n            border-radius: 5px;\n            transition: width 0.5s ease;\n            position: relative;\n        }\n        .progress-fill::after {\n            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;\n            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);\n            animation: shimmer 2s infinite;\n        }\n        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }\n        \n        .fill-magenta { background: linear-gradient(90deg, #ff00ff, #c71585); }\n        .fill-pink { background: linear-gradient(90deg, #ffb7c5, #ff6b81); }\n        .fill-gold { background: linear-gradient(90deg, #f6d365, #fda085); }\n\n        /* 交互提示 */\n        .clickable { cursor: pointer; transition: var(--transition-base); }\n        .clickable:hover { transform: scale(1.02); color: var(--c-accent); }\n        .clickable:active { transform: scale(0.98); }\n\n        /* --- 折叠面板 (Details) --- */\n        .panel-details {\n            background: var(--c-panel-bg);\n            border-radius: var(--radius-md);\n            margin-bottom: var(--space-sm);\n            border: 1px solid var(--c-panel-border);\n            position: relative;\n        }\n        \n        /* 绝对定位悬浮面板 */\n        .absolute-panel {\n            position: absolute !important;\n            top: 100%;\n            left: 0;\n            width: 100%;\n            z-index: 200;\n            background: var(--c-panel-bg);\n            border: 1px solid var(--c-panel-border);\n            border-radius: var(--radius-md);\n            box-shadow: 0 4px 10px rgba(0,0,0,0.2);\n        }\n        .panel-summary {\n            border-radius: var(--radius-md);\n            padding: var(--space-sm) var(--space-md);\n            font-weight: bold;\n            color: var(--c-main);\n            cursor: pointer;\n            list-style: none;\n            display: flex;\n            justify-content: space-between;\n            align-items: center;\n            background: var(--c-tab-bg);\n            transition: var(--transition-base);\n            font-size: var(--fs-md);\n        }\n        .panel-summary::-webkit-details-marker, .melody-summary::-webkit-details-marker, #c-acc-details summary::-webkit-details-marker { display: none; }\n        .panel-summary:hover { filter: brightness(1.1); }\n        .panel-summary i { transition: transform 0.3s; }\n        .panel-details[open] .panel-summary i { transform: rotate(180deg); }\n        .panel-details[open] .panel-summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }\n        .panel-content {\n            padding: 10px;\n        }\n\n        /* --- 数据标签项 --- */\n        .data-tag {\n            background: var(--c-tag-bg);\n            padding: clamp(2px, 0.5cqw, 4px) clamp(4px, 1cqw, 8px);\n            border-radius: var(--radius-sm);\n            font-size: var(--fs-md);\n            border: 1px solid var(--c-panel-border);\n            display: flex;\n            flex-direction: column;\n            box-shadow: 0 1px 3px rgba(0,0,0,0.1);\n            justify-content: center;\n        }\n        .data-tag .lbl { color: var(--c-main); font-size: 1em; margin-bottom: 2px; opacity: 0.9; text-align: center; font-weight: bold; }\n        .data-tag .val { font-weight: 500; text-align: center; word-break: break-word; }\n        \n        /* 双击编辑输入框 */\n        .edit-input {\n            width: 100%;\n            background: rgba(255,255,255,0.9);\n            border: 1px solid var(--c-accent);\n            border-radius: 4px;\n            padding: 2px 4px;\n            font-family: inherit;\n            font-size: inherit;\n            color: inherit;\n            outline: none;\n            text-align: center;\n        }\n\n        /* --- 部位进化环形进度 (紧凑版 & 3D翻转) --- */\n        .evo-grid-compact {\n            grid-area: evo;\n            display: grid;\n            grid-template-columns: repeat(4, minmax(0, 1fr)); /* 强制4列 */\n            gap: 2px; /* 间距缩小为2px */\n            width: 100%;\n            justify-content: end; /* 右对齐 */\n        }\n        \n        /* 手机端窄屏适配 */\n        @media (max-width: 550px) {\n            .mvu-monitor-wrapper { padding: 4px; }\n            .core-dashboard, #melody-wrapper-div, #c-equip-details, #c-fetish-details {\n                margin-left: 1px !important;\n                margin-right: 1px !important;\n            }\n            .global-bar { align-items: flex-start; }\n            .global-left { flex-direction: column; align-items: flex-start; gap: 2px; }\n            .global-left .global-item { margin-left: 0 !important; }\n            \n            .core-dashboard {\n                grid-template-areas: \n                    \"img data\"\n                    \"evo evo\";\n            }\n            .evo-grid-compact {\n                grid-template-columns: repeat(2, minmax(0, 1fr)); /* 变成2x2显示 */\n                justify-content: center;\n                gap: 1px; /* 缩小垂直间距尽量紧凑 */\n            }\n            .evo-front {\n                min-height: auto; /* 移除最小高度限制，完全由内容撑开 */\n                padding: 2px 2px 1px 2px; /* 顶部/左右2px，底部留1px */\n                justify-content: flex-start;\n                gap: 0; /* 移除gap，通过margin精确控制 */\n            }\n            .evo-front .evo-top-row {\n                gap: 2px; /* 缩小环和文字的间距 */\n                margin-bottom: 1px; /* 距离分割线1px */\n            }\n            /* 缩小内部三行元素的垂直间距，并使分割线更细 */\n            .evo-front .fancy-divider {\n                margin: 0; /* 移除外边距 */\n                height: 2px; /* 限制整体高度 */\n                min-height: 2px;\n            }\n            .evo-front .fancy-divider::before,\n            .evo-front .fancy-divider::after {\n                height: 1px;\n                transform: scaleY(0.5); /* 视觉上更细 */\n            }\n            .evo-front .fancy-divider span {\n                padding: 0;\n                line-height: 0.5;\n                font-size: 8px; /* 缩小中间的点 */\n            }\n            .evo-front .evo-desc {\n                flex-grow: 0; /* 防止撑开剩余空间 */\n                min-height: auto;\n                line-height: 1;\n                padding: 0;\n                margin: 1px 0 0 0; /* 上侧距离分割线1px，下侧距离底线由父级padding-bottom控制 */\n                font-size: 10px; /* 修复字体过大问题，确保紧凑 */\n            }\n        }\n        .evo-container-item {\n            perspective: 1000px;\n            position: relative;\n            min-width: 0;\n            height: 100%;\n        }\n        .evo-flipper {\n            position: relative;\n            width: 100%;\n            height: 100%;\n            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);\n            transform-style: preserve-3d;\n        }\n        .evo-container-item.flipped .evo-flipper {\n            transform: rotateY(180deg);\n        }\n        .evo-front, .evo-back {\n            backface-visibility: hidden;\n            -webkit-backface-visibility: hidden;\n            background: var(--c-tag-bg);\n            border-radius: var(--radius-md);\n            border: 1px solid var(--c-panel-border);\n            box-shadow: 0 1px 3px rgba(0,0,0,0.1);\n            margin: 0 4px;\n            width: calc(100% - 8px);\n        }\n        .evo-front {\n            position: relative;\n            min-height: 45px;\n            display: flex;\n            flex-direction: column;\n            align-items: center;\n            justify-content: flex-start;\n            padding: 2px;\n            padding-bottom: 2px;\n            z-index: 2;\n        }\n        .evo-back {\n            position: absolute;\n            top: 0;\n            left: 0;\n            width: 100%;\n            height: 100%;\n            transform: rotateY(180deg);\n            display: flex;\n            flex-direction: column;\n            justify-content: center;\n            align-items: stretch;\n            padding: 8px;\n            gap: 8px;\n            font-size: var(--fs-xs);\n        }\n        .evo-enhance-item {\n            flex: 1;\n            display: flex;\n            align-items: center;\n            padding: 0 4px;\n            border-radius: var(--radius-sm);\n            white-space: nowrap;\n            overflow: hidden;\n            text-overflow: ellipsis;\n        }\n        .evo-top-row {\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            gap: 1cqw;\n            width: 100%;\n            flex-wrap: wrap;\n        }\n        .ring-wrapper {\n            position: relative;\n            width: 6cqw; height: 6cqw; /* 纯容器单位，完美等比 */\n            min-width: 24px; min-height: 24px;\n            border-radius: 50%;\n            display: flex; justify-content: center; align-items: center;\n            background: conic-gradient(var(--c-accent) var(--pct), var(--c-panel-border) 0);\n            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);\n            flex-shrink: 0;\n        }\n        .ring-inner {\n            width: calc(100% - 4px); height: calc(100% - 4px);\n            background: var(--c-tag-bg);\n            border-radius: 50%;\n            display: flex; justify-content: center; align-items: center;\n            font-weight: bold; color: var(--c-main);\n            font-size: clamp(8px, 1.5cqw, 14px);\n        }\n        /* 标题与数值同行 */\n        .evo-name-row { \n            display: flex; align-items: center; justify-content: center; gap: 2px; \n            font-weight: bold; font-size: clamp(10px, 2cqw, 22px); color: var(--c-main); \n            white-space: nowrap;\n        }\n        \n        /* 分割线增强 (通用) */\n        .fancy-divider {\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            gap: 1px;\n            width: 100%;\n            margin: 2px 0;\n            color: var(--c-accent);\n            font-size: 14px;\n            font-weight: bold;\n        }\n        .fancy-divider::before,\n        .fancy-divider::after {\n            content: '';\n            flex-grow: 1;\n            height: 2px;\n            background: linear-gradient(90deg, transparent, var(--c-accent));\n            opacity: 0.6;\n        }\n        .fancy-divider::after {\n            background: linear-gradient(270deg, transparent, var(--c-accent));\n        }\n        .fancy-divider span {\n            line-height: 1.2;\n            padding: 2px 0;\n            white-space: nowrap;\n        }\n        \n        /* 金色分割线 (用于强化标题) */\n        .fancy-divider-gold {\n            color: #ffd700;\n            text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);\n        }\n        .fancy-divider-gold::before {\n            background: linear-gradient(90deg, transparent, #ffd700);\n        }\n        .fancy-divider-gold::after {\n            background: linear-gradient(270deg, transparent, #ffd700);\n        }\n\n        .evo-desc { \n            flex-grow: 1;\n            display: flex;\n            align-items: center;\n            justify-content: center;\n            font-size: 12px; color: var(--c-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; max-width: 100%; text-align: center; \n            min-height: 1.2em;\n        }\n\n        /* --- 实时内心气泡 --- */\n        .thought-bubble {\n            position: relative;\n            display: flex;\n            align-items: flex-start;\n            background: var(--c-tag-bg);\n            border: 1px solid var(--c-panel-border);\n            border-radius: 12px;\n            padding: 2px 6px; /* 减小内边距 */\n            margin-top: 0;\n            margin-bottom: 0;\n            font-style: italic;\n            color: var(--c-main);\n            box-shadow: 0 2px 5px rgba(0,0,0,0.1);\n            animation: breathe 4s ease-in-out infinite;\n            font-size: var(--fs-sm);\n            width: 100%;\n            line-height: 1.2; /* 减小行高 */\n        }\n        .thought-bubble::before {\n            content: ''; position: absolute; top: 50%; left: -10px;\n            transform: translateY(-50%);\n            border-width: 8px 10px 8px 0;\n            border-style: solid;\n            border-color: transparent var(--c-tag-bg) transparent transparent;\n        }\n        @keyframes breathe {\n            0%, 100% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }\n            50% { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }\n        }\n        \n        /* --- 悬浮提示 Tooltip 优化 --- */\n        .tooltip { position: relative; display: inline-flex; align-items: center; cursor: pointer; }\n        .tooltip .tooltiptext {\n            visibility: hidden; width: max-content; max-width: 250px; \n            background-color: var(--c-bg-base); color: var(--c-text-dark);\n            border: 1px solid var(--c-panel-border);\n            text-align: left; border-radius: 6px; padding: 6px 10px; position: absolute;\n            z-index: 9999; bottom: 125%; left: 50%; transform: translateX(-50%);\n            opacity: 0; transition: opacity 0.2s; font-size: var(--fs-xs); font-weight: normal;\n            white-space: pre-wrap; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.3);\n        }\n        .tooltip:hover .tooltiptext, .tooltip.active-click .tooltiptext { visibility: visible; opacity: 1; }\n        \n        .melody-pill { background: var(--c-melody-bg) !important; }\n        \n        /* 进度条说明：向右对齐，与进度条上侧对齐（同行） */\n        .tooltip-right .tooltiptext {\n            left: auto; right: 0; transform: none; bottom: 100%; margin-bottom: 2px;\n        }\n        \n        /* 体味旋律左对齐列表 (同行显示) */\n        .melody-list {\n            display: flex;\n            flex-direction: row;\n            flex-wrap: wrap;\n            align-items: center;\n            justify-content: flex-start;\n            gap: 4px;\n            width: fit-content; /* 紧密包裹，限制悬停触发区域 */\n            margin-left: 6px; /* 增加左侧缩进 */\n        }\n        .melody-item {\n            display: flex;\n            align-items: center;\n            justify-content: flex-start; /* 左对齐 */\n            gap: 0;\n            font-size: var(--fs-sm);\n            white-space: nowrap;\n            width: fit-content; /* 紧密包裹 */\n            padding: 2px 6px;\n        }\n        /* 防止极简介绍超出右侧边框 */\n        .tooltip-left-expand .tooltiptext {\n            left: auto; right: 0; transform: none;\n        }\n        \n        /* 进度条 MAX 呼吸特效 */\n        .ring-wrapper.is-max {\n            animation: ring-breathe 2s infinite alternate;\n        }\n        @keyframes ring-breathe {\n            from { box-shadow: 0 0 5px var(--c-accent), inset 0 0 5px var(--c-accent); }\n            to { box-shadow: 0 0 15px var(--c-accent), inset 0 0 15px var(--c-accent); }\n        }\n\n        /* 呼吸感荧光红 (用于空值) */\n        .text-neon-red {\n            color: #ff003c;\n            font-weight: bold;\n            text-shadow: 0 0 5px #ff003c, 0 0 10px #ff003c;\n            animation: neon-breathe 2s infinite alternate;\n        }\n        @keyframes neon-breathe {\n            from { text-shadow: 0 0 5px #ff003c, 0 0 10px #ff003c; opacity: 0.8; }\n            to { text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c; opacity: 1; }\n        }\n        \n        /* 金色闪光 */\n        .text-gold-flash {\n            color: #ffd700;\n            font-weight: bold;\n            text-shadow: 0 0 5px #ffd700;\n            animation: gold-flash 1.5s infinite;\n        }\n        @keyframes gold-flash {\n            0%, 100% { opacity: 1; text-shadow: 0 0 5px #ffd700; }\n            50% { opacity: 0.6; text-shadow: 0 0 15px #ffd700, 0 0 20px #fff; }\n        }\n        \n        /* 亮粉色 (与圆融青涩同色) */\n        .text-bright-pink {\n            color: var(--c-accent);\n            font-weight: bold;\n        }\n\n        /* 待更新内容统一格式 (以圆融为标准) */\n        .val-pink-bold {\n            color: var(--c-accent);\n            font-weight: bold;\n            text-align: center;\n            font-size: var(--fs-sm);\n        }\n\n        /* 装备、配饰、性癖通用气泡样式 (状态平台底色) */\n        .item-bubble {\n            background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), rgba(248, 195, 205, 0.3));\n            border: none !important;\n            box-shadow: 0 0 2px rgba(255, 255, 255, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.3) !important;\n            transition: var(--transition-base);\n        }\n        .theme-dark .item-bubble {\n            background: linear-gradient(90deg, rgba(50, 6, 15, 0.8), rgba(30, 3, 9, 0.7));\n            box-shadow: 0 0 2px rgba(255, 143, 163, 0.2), inset 0 0 4px rgba(255, 77, 109, 0.15) !important;\n        }\n        .item-bubble:hover {\n            filter: brightness(1.15);\n            transform: translateY(-1px);\n        }\n\n        /* 飘字动画特效 */\n        .floating-number {\n            position: absolute;\n            font-weight: bold;\n            font-size: 18px;\n            pointer-events: none;\n            z-index: 1000;\n            animation: float-up-fade 1.5s ease-out forwards;\n        }\n        .float-pos { color: #34c759; text-shadow: 0 0 5px #fff; }\n        .float-neg { color: #ff3b30; text-shadow: 0 0 5px #fff; }\n        @keyframes float-up-fade {\n            0% { opacity: 1; transform: translateY(0) scale(1); }\n            50% { transform: translateY(-20px) scale(1.2); }\n            100% { opacity: 0; transform: translateY(-40px) scale(1); }\n        }\n\n        /* 爱意喷泉特效 */\n        .heart-fountain {\n            position: absolute;\n            top: 50%; left: 50%;\n            width: 0; height: 0;\n            pointer-events: none;\n            z-index: 1000;\n            overflow: visible;\n        }\n        .heart-particle {\n            position: absolute;\n            color: #ff003c;\n            font-size: 18px;\n            text-shadow: 0 0 5px #ff003c;\n            animation: fountain-burst 2s ease-out forwards;\n            opacity: 0;\n        }\n        @keyframes fountain-burst {\n            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }\n            50% { opacity: 1; }\n            100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity: 0; }\n        }\n\n        /* --- 评价等级特效 --- */\n        /* SSS：金色流光，细亮粉色描边 */\n        .rank-sss {\n            font-size: var(--fs-md) !important; /* 比当前大一号 */\n            background: linear-gradient(90deg, #ffd700, #ffdf00, #ffae42, #ffd700);\n            background-size: 200% auto;\n            color: transparent;\n            -webkit-background-clip: text;\n            background-clip: text;\n            -webkit-text-stroke: 0.5px #ffb7c5;\n            text-shadow: 0 0 5px rgba(255, 183, 197, 0.8);\n            animation: shine 2s linear infinite;\n        }\n\n        /* SSS+：金红色流光，细亮白色描边，粒子光效 */\n        .rank-sss-plus {\n            font-size: var(--fs-md) !important;\n            background: linear-gradient(90deg, #ff4500, #ff8c00, #ff4500);\n            background-size: 200% auto;\n            color: transparent;\n            -webkit-background-clip: text;\n            background-clip: text;\n            -webkit-text-stroke: 0.5px #ffffff;\n            text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 15px rgba(255, 69, 0, 0.8);\n            animation: shine 1.5s linear infinite;\n            position: relative;\n        }\n\n        /* 粒子光效模拟 */\n        .rank-sss-plus::before, .rank-sss-plus::after {\n            content: '✦';\n            position: absolute;\n            color: #fff;\n            font-size: 10px;\n            -webkit-text-stroke: 0;\n            text-shadow: 0 0 5px #fff, 0 0 10px #ff4500;\n            animation: sparkle 1s infinite alternate;\n            pointer-events: none;\n        }\n        .rank-sss-plus::before { top: -8px; left: -5px; animation-delay: 0s; }\n        .rank-sss-plus::after { bottom: -8px; right: -5px; animation-delay: 0.5s; }\n\n        @keyframes shine {\n            to { background-position: 200% center; }\n        }\n        @keyframes sparkle {\n            0% { opacity: 0; transform: scale(0.5) rotate(0deg); }\n            100% { opacity: 1; transform: scale(1.2) rotate(90deg); }\n        }\n\n    </style>\n</head>\n<body>\n\n<div class=\"mvu-monitor-wrapper\" id=\"monitor-app\">\n    <div class=\"lace-border\"></div>\n    <div class=\"particles\" id=\"particles-container\"></div>\n\n    <div class=\"z-content\">\n        <!-- 第一行：全局信息 (狭窄) -->\n        <div class=\"global-bar\">\n            <div class=\"flex-row global-left\">\n                <div class=\"global-item\"><span id=\"g-datetime\">--年--月--日 --点--分 周-</span></div>\n                <div class=\"global-item\" style=\"margin-left: 8px;\"><i class=\"fas fa-map-marker-alt\"></i> <span id=\"g-loc\">未知</span></div>\n            </div>\n            <div class=\"flex-row global-right\">\n                <div class=\"global-item\"><i class=\"fas fa-coins\"></i> <span id=\"g-cash\">0</span>元</div>\n                <div class=\"global-item\"><i class=\"fas fa-star\"></i> <span id=\"g-score\">0</span>点</div>\n                <div class=\"min-btn\" id=\"toggle-theme\" title=\"切换风格\"><i class=\"fas fa-moon\"></i></div>\n                <div class=\"min-btn\" id=\"toggle-min\" title=\"最小化\"><i class=\"fas fa-compress-alt\"></i></div>\n            </div>\n        </div>\n\n        <!-- 第二行：顶部导航 Tab -->\n        <div class=\"nav-tabs hide-on-min\" id=\"nav-tabs\">\n            <div class=\"flex-row\" style=\"overflow-x: auto; scrollbar-width: none;\">\n                <div class=\"tab-btn active\" data-char=\"苏瑶\">苏瑶</div>\n                <div class=\"tab-btn\" data-char=\"苏双双\">苏双双</div>\n                <div class=\"tab-btn\" data-char=\"叶婉秋\">叶婉秋</div>\n                <div class=\"tab-btn tooltip\" style=\"opacity:0.5; cursor:not-allowed;\">+<span class=\"tooltiptext\">预留新角色</span></div>\n            </div>\n            <div class=\"flex-row\">\n                <div class=\"tab-btn tooltip\" style=\"opacity:0.5; cursor:not-allowed; font-size: var(--fs-md);\"><i class=\"fas fa-tshirt\"></i><span class=\"tooltiptext\">衣柜(预留)</span></div>\n                <div class=\"tab-btn tooltip\" style=\"opacity:0.5; cursor:not-allowed; font-size: var(--fs-md);\"><i class=\"fas fa-store\"></i><span class=\"tooltiptext\">商城(预留)</span></div>\n            </div>\n        </div>\n\n        <!-- 第三区块：核心仪表盘 (左图右数据) -->\n        <div class=\"core-dashboard hide-on-min\">\n            <!-- 左侧图片展示区 -->\n            <div class=\"core-image-zone\" id=\"c-image-zone\" title=\"点击切换图片\">\n                <img id=\"c-image\" src=\"\" alt=\"角色图片\">\n            </div>\n            \n            <!-- 右侧数据区 -->\n            <div class=\"core-data-zone\">\n                <!-- 行1：名称 & 评价 & 敏感度 -->\n                <div class=\"dash-row-1\" style=\"justify-content: space-between;\">\n                    <div style=\"display: flex; gap: 4px;\">\n                        <div class=\"island-pill\">\n                            <span style=\"font-size: calc(var(--fs-lg) + 2px); font-weight: bold; color: var(--c-main); white-space: nowrap;\">\n                                <span id=\"c-nickname\">瑶瑶</span>\n                            </span>\n                        </div>\n                        <div class=\"island-pill\">\n                            <span id=\"c-melody-rank\" style=\"font-size: var(--fs-sm); font-weight: bold; color: var(--c-accent); white-space: nowrap;\">SS</span>\n                        </div>\n                    </div>\n                    <div class=\"island-pill clickable tooltip\" id=\"c-sense-btn\" style=\"font-size: var(--fs-sm); font-weight: bold; color: var(--c-main); flex-shrink: 0;\">\n                        敏感度等级：<span id=\"c-sense-val\" style=\"color: var(--c-accent);\">青涩</span>\n                        <span class=\"tooltiptext\">单击循环切换</span>\n                    </div>\n                </div>\n                \n                <!-- 行2：称号 & 境界与小属性 -->\n                <div class=\"dash-row-1\" style=\"justify-content: space-between; margin-top: 0;\">\n                    <div class=\"island-pill\" style=\"font-size: calc(var(--fs-sm-label) + 2px); font-weight: bold; color: var(--c-main); white-space: nowrap;\">\n                        Lv <span id=\"c-love-lv\" style=\"color: var(--c-accent);\">0</span> · <span id=\"c-love-title\" style=\"color: var(--c-accent);\">未知</span>\n                    </div>\n                    <div class=\"island-pill\" style=\"font-size: var(--fs-sm-label); font-weight: bold; color: var(--c-main); gap: 2px; flex-wrap: wrap; justify-content: flex-end;\">\n                        <span class=\"tooltip\" style=\"white-space: nowrap;\">境界：<span id=\"c-realm-val\" style=\"color: var(--c-accent);\">锁灵</span><span class=\"tooltiptext\" id=\"c-realm-tooltip\" style=\"width: 200px; text-align: left; white-space: pre-wrap; line-height: 1.5;\"></span></span>\n                        <span style=\"opacity: 0.5;\">|</span>\n                        <span class=\"tooltip\" style=\"color: var(--c-main); white-space: nowrap;\">圆融<span id=\"c-climax-val\" style=\"color: var(--c-accent);\">0</span>次<span class=\"tooltiptext\">绝顶</span></span>\n                        <span style=\"opacity: 0.5;\">|</span>\n                        <span class=\"tooltip\"><i class=\"fas fa-star\"></i> <span id=\"c-star-val\" style=\"color: var(--c-accent);\">0</span><span class=\"tooltiptext\">乳星 (星衍境大高潮可生成❤~)</span></span>\n                        <span class=\"tooltip\"><i class=\"fas fa-seedling\"></i> <span id=\"c-preg-val\" style=\"color: var(--c-accent);\">无</span><span class=\"tooltiptext\">孕灵 (蕴灵境种灵或明确种族❤~)</span></span>\n                        <span class=\"tooltip\"><i class=\"fas fa-baby\"></i> <span id=\"c-birth-val\" style=\"color: var(--c-accent);\">0</span><span class=\"tooltiptext\">诞灵 (产下假婴可增加❤~)</span></span>\n                        <span class=\"tooltip\"><i class=\"fas fa-wifi\"></i> <span id=\"c-reso-val\" style=\"color: var(--c-accent);\">0</span><span class=\"tooltiptext\">共鸣 (多女同时绝顶可增加❤~)</span></span>\n                        <span class=\"tooltip tooltip-left-expand\"><i class=\"fas fa-bolt\"></i> <span id=\"c-over-val\" style=\"color: var(--c-accent);\">0</span><span class=\"tooltiptext\">过载 (灵融境灵体叠加肉体绝顶❤~)</span></span>\n                    </div>\n                </div>\n\n                <!-- 行3-5：实时内心 (高度缩小30%) -->\n                <div class=\"thought-bubble hide-on-min\" style=\"min-height: 3em;\">\n                    <i class=\"fas fa-quote-left\" style=\"opacity:0.3; margin-right:3px; margin-top: 2px;\"></i>\n                    <span id=\"c-thought-val\" style=\"flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;\">...</span>\n                    <i class=\"fas fa-quote-right\" style=\"opacity:0.3; margin-left:3px; align-self: flex-end; margin-bottom: 2px;\"></i>\n                </div>\n\n                <!-- 行6-8：进度条集合 -->\n                <div class=\"island-pill\" style=\"flex-direction: column; align-items: stretch; gap: 2px; padding: 4px 12px; width: 100%; margin-bottom: 0;\">\n                    <!-- 爱意值 -->\n                    <div class=\"progress-row clickable tooltip tooltip-right\" id=\"c-love-btn\">\n                        <div class=\"progress-label-group\">\n                            <span>爱意值：</span>\n                            <span class=\"text-gold-flash\"><span id=\"c-love-val\">0</span>/100</span>\n                        </div>\n                        <div class=\"progress-track\"><div class=\"progress-fill fill-magenta\" id=\"c-love-bar\" style=\"width: 0%;\"></div></div>\n                        <span class=\"tooltiptext\">≥100可升级 <span id=\"c-love-total\">0</span>/2000</span>\n                    </div>\n\n                    <!-- 好感度 -->\n                    <div class=\"progress-row clickable tooltip tooltip-right\" id=\"c-favor-btn\">\n                        <div class=\"progress-label-group\">\n                            <span>好感度：</span>\n                            <span class=\"text-gold-flash\"><span id=\"c-favor-val\">0</span>/100</span>\n                        </div>\n                        <div class=\"progress-track\"><div class=\"progress-fill fill-pink\" id=\"c-favor-bar\" style=\"width: 0%;\"></div></div>\n                        <span class=\"tooltiptext\">≥105可转化 <span id=\"c-favor-total\">0</span>/2000</span>\n                    </div>\n\n                    <!-- 抗性 -->\n                    <div class=\"progress-row\">\n                        <div class=\"progress-label-group\">\n                            <span>抗性值：</span>\n                            <span class=\"text-gold-flash\"><span id=\"c-res-val\">100</span>/100</span>\n                        </div>\n                        <div class=\"progress-track\"><div class=\"progress-fill fill-gold\" id=\"c-res-bar\" style=\"width: 100%;\"></div></div>\n                    </div>\n                </div>\n            </div>\n            \n            <!-- 行9：部位进化仪表盘 (紧凑版) -->\n            <div class=\"evo-grid-compact\" id=\"c-evo-container\" style=\"position: relative; z-index: 50;\">\n                <!-- 动态生成 -->\n            </div>\n        </div>\n\n        <!-- 体味旋律 (气泡直接在背景上) -->\n        <div style=\"position: relative; z-index: 101; cursor: pointer; margin-top: 4px; margin-bottom: 4px;\" class=\"hide-on-min\" id=\"melody-wrapper-div\" title=\"双击整行可固定展开/折叠\">\n            <div class=\"melody-list\" id=\"melody-summary\" style=\"margin-bottom: var(--space-sm);\">\n                <div class=\"melody-item island-pill melody-pill\">\n                    <span class=\"editable-text\" data-path=\"\" id=\"c-melody-body\" style=\"color: var(--c-accent); font-weight: normal; text-align: right;\">无</span><span style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">香</span>\n                </div>\n                <div class=\"melody-item island-pill melody-pill\">\n                    <span class=\"editable-text\" data-path=\"\" id=\"c-melody-fluid\" style=\"color: var(--c-accent); font-weight: normal; text-align: right;\">无</span><span style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">味</span>\n                </div>\n                <div class=\"melody-item island-pill melody-pill\">\n                    <span style=\"color: var(--c-accent); font-weight: normal; text-align: right;\">口感</span><span class=\"editable-text\" data-path=\"\" id=\"c-melody-taste\" style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">无</span>\n                </div>\n                <div class=\"melody-item island-pill melody-pill\" id=\"c-melody-temp-body-row\">\n                    <span style=\"color: var(--c-accent); font-weight: normal; text-align: right;\">点缀:</span><span class=\"editable-text\" data-path=\"\" id=\"c-melody-temp-body\" style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">无</span><span style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">味儿</span>\n                </div>\n                <div class=\"melody-item island-pill melody-pill\" id=\"c-melody-temp-taste-row\">\n                    <span style=\"color: var(--c-accent); font-weight: normal; text-align: right;\">点缀:</span><span class=\"editable-text\" data-path=\"\" id=\"c-melody-temp-taste\" style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">无</span><span style=\"color: var(--c-accent); font-weight: normal; text-align: left;\">口感</span>\n                </div>\n            </div>\n            \n            <!-- 体液与气味展开面板 -->\n            <div class=\"panel-content absolute-panel\" id=\"c-fluids-container\" style=\"display: none; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); border-top: none; margin-bottom: var(--space-sm); background: var(--c-panel-bg); border: 1px solid var(--c-panel-border); border-radius: var(--radius-md); padding: var(--space-md);\">\n                <!-- 动态生成 -->\n            </div>\n        </div>\n\n        <!-- 装备与配饰栏 -->\n        <details class=\"panel-details hide-on-min\" id=\"c-equip-details\">\n            <summary class=\"panel-summary\" style=\"justify-content: center; padding: var(--space-sm); background: transparent;\">\n                <div class=\"fancy-divider\" style=\"margin: 0;\"><span>着装</span></div>\n            </summary>\n            <div class=\"panel-content\" style=\"display: flex; flex-direction: column; gap: 3px; padding: 10px; border-top: none;\">\n                <div id=\"c-equip-container\" style=\"display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 10px;\">\n                    <!-- 动态生成 -->\n                </div>\n                <details id=\"c-acc-details\">\n                    <summary style=\"list-style: none; cursor: pointer; outline: none;\">\n                        <div class=\"fancy-divider\"><span>配饰</span></div>\n                    </summary>\n                    <div id=\"c-acc-container\" style=\"display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px 10px; margin-top: 3px;\">\n                        <!-- 动态生成 -->\n                    </div>\n                </details>\n            </div>\n        </details>\n\n        <!-- 性癖档案 (2x3) -->\n        <details class=\"panel-details hide-on-min\" id=\"c-fetish-details\">\n            <summary class=\"panel-summary\" style=\"justify-content: center; padding: var(--space-sm); background: transparent;\">\n                <div class=\"fancy-divider\" style=\"margin: 0;\"><span>性癖档案</span></div>\n            </summary>\n            <div class=\"panel-content\" id=\"c-fetish-container\" style=\"display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px 10px; padding: 10px; border-top: none;\">\n                <!-- 动态生成 -->\n            </div>\n        </details>\n\n    </div>\n</div>\n\n<script>\n(async function() {\n    const $ = id => document.getElementById(id);\n    const $$ = sel => document.querySelectorAll(sel);\n    \n    // --- Base64 图片库 ---\n    // 请在此处替换为您转换好的Base64字符串，或使用网络图片链接\n    const CharImages = {\n        '苏瑶': [\n            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏瑶/苏瑶咬唇.jpg', // 占位图1\n            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏瑶/吐舌.jpg', // 占位图2\n        ],\n        '苏双双': [\n            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏双双/绿丝绸苏双双.jpg'\n        ],\n        '叶婉秋': [\n            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/叶婉秋/叶婉秋红色丝衣.jpg'\n        ]\n    };\n    \n    // 敏感度阶梯定义\n    const SENSE_LEVELS = ['青涩', '觉醒', '渴求', '失控', '享乐', '纵情', '畅爽', '绝巅', '爽泄', '登仙', '纵欲', '欢愉'];\n    \n    // 状态管理\n    const AppState = {\n        activeChar: '苏瑶',\n        mvuData: null,\n        isReady: false,\n        theme: 'light'\n    };\n\n    // --- 工具函数 ---\n    const getLoveTitle = (lv) => {\n        if (lv < 1) return '友善';\n        if (lv < 10) return '暗恋';\n        if (lv < 20) return '初恋';\n        if (lv < 30) return '热恋';\n        if (lv < 40) return '眷恋';\n        if (lv < 50) return '依恋';\n        if (lv < 60) return '深爱';\n        if (lv < 70) return '病娇';\n        if (lv < 80) return '生死相依';\n        if (lv < 90) return '灵魂伴侣';\n        if (lv < 100) return '永恒契约';\n        if (lv < 110) return '终极归宿';\n        return '真爱化身';\n    };\n    \n    const bindEditableTexts = (container) => {\n        container.querySelectorAll('.editable-text').forEach(el => {\n            if(el.dataset.bound) return;\n            el.dataset.bound = \"true\";\n            el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });\n            el.addEventListener('dblclick', function(e) {\n                e.preventDefault();\n                e.stopPropagation();\n                if(this.querySelector('input')) return;\n                const currentVal = this.textContent;\n                const path = this.getAttribute('data-path');\n                const inputVal = (currentVal === '\\xa0' || currentVal.trim() === '') ? '' : currentVal;\n                this.innerHTML = `<input type=\"text\" class=\"edit-input\" value=\"${inputVal}\">`;\n                const input = this.querySelector('input');\n                input.focus();\n                \n                input.addEventListener('click', ev => ev.stopPropagation());\n                input.addEventListener('dblclick', ev => ev.stopPropagation());\n                \n                const save = () => {\n                    const newVal = input.value.trim() || '无';\n                    this.innerHTML = formatEmptyVal(newVal);\n                    const oldVal = (currentVal === '\\xa0' || currentVal.trim() === '') ? '无' : currentVal;\n                    if(newVal !== oldVal) {\n                        updateMvu(path, newVal, \"已更新\");\n                    }\n                };\n                input.addEventListener('blur', save);\n                input.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') input.blur(); });\n            });\n        });\n    };\n    // 格式化空值\n    const formatEmptyVal = (val) => {\n        if (!val || val === '无' || val === '未觉醒' || val === '未知') {\n            return `<span class=\"text-neon-red\">&nbsp;</span>`;\n        }\n        return val;\n    };\n\n    // 爱意喷泉特效\n    const createHeartFountain = (element) => {\n        const fountain = document.createElement('div');\n        fountain.className = 'heart-fountain';\n        if (window.getComputedStyle(element).position === 'static') {\n            element.style.position = 'relative';\n        }\n        element.appendChild(fountain);\n\n        const duration = 6000;\n        const interval = 100;\n        let elapsed = 0;\n\n        const timer = setInterval(() => {\n            if (elapsed >= duration) {\n                clearInterval(timer);\n                setTimeout(() => fountain.remove(), 2000);\n                return;\n            }\n            const count = Math.floor(Math.random() * 3) + 2;\n            for (let i = 0; i < count; i++) {\n                const particle = document.createElement('i');\n                particle.className = 'fas fa-heart heart-particle';\n                const angle = (Math.random() * 60 - 30) * (Math.PI / 180);\n                const velocity = Math.random() * 60 + 40;\n                const tx = Math.sin(angle) * velocity + 'px';\n                const ty = -Math.cos(angle) * velocity - (Math.random() * 30) + 'px';\n                const rot = (Math.random() * 360) + 'deg';\n                \n                particle.style.setProperty('--tx', tx);\n                particle.style.setProperty('--ty', ty);\n                particle.style.setProperty('--rot', rot);\n                particle.style.fontSize = (Math.random() * 10 + 10) + 'px';\n                if (Math.random() > 0.5) particle.style.color = '#ff4d6d';\n                \n                fountain.appendChild(particle);\n                particle.addEventListener('animationend', () => particle.remove());\n            }\n            elapsed += interval;\n        }, interval);\n    };\n\n    // 飘字特效\n    const showFloatingNumber = (element, text, type = 'pos') => {\n        const floater = document.createElement('span');\n        floater.textContent = text;\n        floater.className = `floating-number float-${type}`;\n        const offsetX = (Math.random() - 0.5) * 20;\n        floater.style.left = `calc(50% + ${offsetX}px)`;\n        floater.style.top = '0';\n        if (window.getComputedStyle(element).position === 'static') {\n            element.style.position = 'relative';\n        }\n        element.appendChild(floater);\n        floater.addEventListener('animationend', () => floater.remove());\n    };\n\n    const showToast = (msg, type='info') => {\n        if(typeof triggerSlash === 'function') {\n            const safeMsg = typeof msg === 'string' ? msg.replace(/(\\\\+)?([|{}])/g, (m, s, c) => (s || '') + (s || '') + '\\\\' + c) : msg;\n            triggerSlash(`/echo severity=${type} ${safeMsg}`);\n        } else {\n            console.log(`[${type}] ${msg}`);\n        }\n    };\n\n    const createParticles = () => {\n        const container = $('particles-container');\n        if(!container) return;\n        container.innerHTML = '';\n        for(let i=0; i<15; i++) {\n            const p = document.createElement('div');\n            p.className = 'particle';\n            const size = Math.random() * 6 + 2;\n            p.style.width = `${size}px`;\n            p.style.height = `${size}px`;\n            p.style.left = `${Math.random() * 100}%`;\n            p.style.animationDuration = `${Math.random() * 3 + 2}s`;\n            p.style.animationDelay = `${Math.random() * 2}s`;\n            container.appendChild(p);\n        }\n    };\n\n    // --- 数据交互逻辑 ---\n    const fetchMvuData = () => {\n        if (typeof getAllVariables !== 'function' || typeof _ === 'undefined') return false;\n        AppState.mvuData = getAllVariables();\n        return !!AppState.mvuData;\n    };\n\n    const updateMvu = async (path, newValue, successMsg) => {\n        if (typeof Mvu === 'undefined' || typeof getCurrentMessageId !== 'function') {\n            showToast(\"MVU环境未就绪\", \"error\");\n            return false;\n        }\n        try {\n            const msgId = getCurrentMessageId();\n            const data = Mvu.getMvuData({ type: 'message', message_id: msgId });\n            if (!data) return false;\n            \n            _.set(data, path, newValue);\n            await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });\n            \n            if(successMsg) showToast(successMsg, \"success\");\n            fetchMvuData();\n            renderUI();\n            return true;\n        } catch (e) {\n            console.error(e);\n            showToast(\"数据更新失败\", \"error\");\n            return false;\n        }\n    };\n\n    // --- 渲染逻辑 ---\n    \n    // 渲染图片区\n    const renderImage = (charData) => {\n        const imgEl = $('c-image');\n        const images = CharImages[AppState.activeChar] || [];\n        if (images.length === 0) {\n            imgEl.src = '';\n            return;\n        }\n        // 读取MVU中的图片索引，若无则默认为0\n        let imgIdx = _.get(charData, '装备与心理.当前图片索引', 0);\n        if (imgIdx >= images.length) imgIdx = 0;\n        imgEl.src = images[imgIdx];\n    };\n\n    const renderGlobal = () => {\n        const d = AppState.mvuData;\n        const t = _.get(d, 'stat_data.全局.时间', {});\n        \n        const year  = t.年  ?? '--';\n        const month = t.月  ? String(t.月).padStart(2, '0') : '--';\n        const day   = t.日  ? String(t.日).padStart(2, '0') : '--';\n        const hour  = t.时  ? String(t.时).padStart(2, '0') : '--';\n        const min   = t.分  ? String(t.分).padStart(2, '0') : '--';\n        const week  = t.星期 ?? '';\n\n        $('g-datetime').textContent = `${year}年${month}月${day}日 ${hour}:${min} ${week}`;\n        $('g-loc').textContent = _.get(d, 'stat_data.全局.地点', '未知');\n        $('g-cash').textContent = _.get(d, 'stat_data.全局.资源.现金', 0);\n        $('g-score').textContent = _.get(d, 'stat_data.全局.资源.积分', 0);\n    };\n\n    const renderCore = (charData) => {\n        const love = charData.好感与爱意 || {};\n        const sense = charData.敏感度与境界 || {};\n        const multi = charData.多维行为检测 || {};\n        \n        const nickMap = { '苏瑶': '瑶瑶', '苏双双': '双双', '叶婉秋': '婉秋' };\n        $('c-nickname').textContent = nickMap[AppState.activeChar] || AppState.activeChar;\n        \n        // 强制前端计算称号，确保显示正确\n        const currentLoveLv = love.爱意等级 || 0;\n        $('c-love-title').textContent = getLoveTitle(currentLoveLv);\n        $('c-love-lv').textContent = currentLoveLv;\n        $('c-love-val').textContent = love.爱意值 || 0;\n        \n        // 计算体味旋律评价\n        const melody = charData.体味旋律 || {};\n        let rank = 'SS';\n        const hasTempBody = melody.临时体香 && melody.临时体香 !== '无' && melody.临时体香 !== '未觉醒' && melody.临时体香 !== '未开发' && melody.临时体香 !== '未知';\n        const hasTempTaste = melody.临时口感 && melody.临时口感 !== '无' && melody.临时口感 !== '未觉醒' && melody.临时口感 !== '未开发' && melody.临时口感 !== '未知';\n        if (hasTempTaste) {\n            rank = 'SSS+';\n        } else if (hasTempBody) {\n            rank = 'SSS';\n        }\n        const rankEl = $('c-melody-rank');\n        if (rankEl) {\n            rankEl.textContent = rank;\n            // 清理旧特效\n            rankEl.classList.remove('rank-sss', 'rank-sss-plus');\n            // 应用新特效\n            if (rank === 'SSS') {\n                rankEl.classList.add('rank-sss');\n            } else if (rank === 'SSS+') {\n                rankEl.classList.add('rank-sss-plus');\n            }\n        }\n        \n        // 进度条逻辑：基于累计值计算，满值为2000\n        const totalLove = love.累计爱意值 || love.爱意值 || 0;\n        const lovePct = Math.min(100, (totalLove / 2000) * 100);\n        $('c-love-bar').style.width = `${lovePct}%`;\n        const loveTotalEl = $('c-love-total');\n        if (loveTotalEl) loveTotalEl.textContent = totalLove;\n        \n        $('c-favor-val').textContent = love.好感度 || 0;\n        \n        // 进度条逻辑：基于累计值计算，满值为2000\n        const totalFavor = love.累计好感度 || love.好感度 || 0;\n        const favorPct = Math.min(100, (totalFavor / 2000) * 100);\n        $('c-favor-bar').style.width = `${favorPct}%`;\n        const favorTotalEl = $('c-favor-total');\n        if (favorTotalEl) favorTotalEl.textContent = totalFavor;\n        \n        $('c-sense-val').textContent = sense.当前敏感度等级 || '青涩';\n        $('c-res-val').textContent = sense._生理抗性 || 100;\n        $('c-res-bar').style.width = `${sense._生理抗性 || 100}%`;\n        $('c-climax-val').textContent = sense.圆融计数 || 0;\n        \n        const currentRealm = sense.红鸾境界 || '锁灵';\n        $('c-realm-val').textContent = currentRealm;\n        $('c-star-val').textContent = multi.乳星 || 0;\n        $('c-preg-val').textContent = multi.孕灵状态 || '无';\n        $('c-birth-val').textContent = multi.诞灵次数 || 0;\n        $('c-reso-val').textContent = multi.共鸣次数 || 0;\n        $('c-over-val').textContent = multi.感官过载次数 || 0;\n        \n        // 动态计算境界突破提示\n        const globalScore = _.get(AppState.mvuData, 'stat_data.全局.资源.积分', 0);\n        const curClimax = sense.圆融计数 || 0;\n        const curStar = multi.乳星 || 0;\n        const curBirth = multi.诞灵次数 || 0;\n        const curReso = multi.共鸣次数 || 0;\n        const curOver = multi.感官过载次数 || 0;\n        const curLoveLv = love.爱意等级 || 0;\n        \n        let tooltipText = '';\n        let targetRealm = currentRealm;\n        if (curClimax >= 100 && curStar >= 200 && curOver >= 20 && curLoveLv >= 80) targetRealm = '众妙'; \n        else if (curClimax >= 50 && curStar >= 100 && curReso >= 10) targetRealm = '灵融';\n        else if (curClimax >= 20 && curStar >= 20 && curBirth >= 1 && curLoveLv >= 20) targetRealm = '蕴灵';\n        else if (curClimax >= 5 && curStar >= 1) targetRealm = '星衍';\n        else if (curClimax >= 2) targetRealm = '玉润';\n\n        const realms = ['锁灵', '玉润', '星衍', '蕴灵', '灵融', '众妙'];\n        const canBreakthrough = realms.indexOf(targetRealm) > realms.indexOf(currentRealm);\n\n        if (currentRealm === '锁灵') {\n            tooltipText = `【突破至 玉润】\\n圆融计数: ${curClimax}/5\\n积分: ${globalScore}/221`;\n        } else if (currentRealm === '玉润') {\n            tooltipText = `【突破至 星衍】\\n圆融计数: ${curClimax}/10\\n积分: ${globalScore}/401`;\n        } else if (currentRealm === '星衍') {\n            tooltipText = `【突破至 蕴灵】\\n圆融计数: ${curClimax}/40\\n乳星: ${curStar}/30\\n诞灵次数: ${curBirth}/1\\n爱意等级: ${curLoveLv}/30`;\n        } else if (currentRealm === '蕴灵') {\n            tooltipText = `【突破至 灵融】\\n圆融计数: ${curClimax}/60\\n共鸣次数: ${curReso}/10`;\n        } else if (currentRealm === '灵融') {\n            tooltipText = `【突破至 众妙】\\n圆融计数: ${curClimax}/80\\n感官过载: ${curOver}/1\\n爱意等级: ${curLoveLv}/80`;\n        } else if (currentRealm === '众妙') {\n            tooltipText = `已达最高境界【众妙】\\n万法自然，灵枢圆融。`;\n        }\n        \n        const realmValEl = $('c-realm-val');\n        if (canBreakthrough) {\n            realmValEl.classList.add('text-gold-flash');\n            realmValEl.style.cursor = 'pointer';\n            realmValEl.onclick = () => {\n                if(typeof triggerSlash === 'function') {\n                    triggerSlash(`/setinput 协助她突破到${targetRealm}境界`);\n                }\n            };\n            tooltipText = `【可突破至 ${targetRealm}】\\n点击协助突破！\\n\\n` + tooltipText;\n        } else {\n            realmValEl.classList.remove('text-gold-flash');\n            realmValEl.style.cursor = 'default';\n            realmValEl.onclick = null;\n        }\n\n        const realmTooltip = $('c-realm-tooltip');\n        if (realmTooltip) realmTooltip.textContent = tooltipText;\n        \n        $('c-thought-val').textContent = charData.装备与心理?.实时内心 || '...';\n        \n        // 动态背景色偏移\n        const levelIdx = SENSE_LEVELS.indexOf(sense.当前敏感度等级 || '青涩');\n        const ratio = Math.max(0, Math.min(1, levelIdx / (SENSE_LEVELS.length - 1)));\n\n        const wrapper = $('monitor-app');\n        if (AppState.theme === 'dark') {\n            const r1 = 26 + (34 * ratio), g1 = 5 + (5 * ratio), b1 = 10 + (10 * ratio);\n            const r2 = 40 + (40 * ratio), g2 = 10 + (10 * ratio), b2 = 20 + (10 * ratio);\n            wrapper.style.setProperty('--dynamic-bg-1', `rgba(${r1},${g1},${b1},0.9)`);\n            wrapper.style.setProperty('--dynamic-bg-2', `rgba(${r2},${g2},${b2},0.8)`);\n        } else {\n            const r1 = 255, g1 = 240 - (40 * ratio), b1 = 245 - (35 * ratio);\n            const r2 = 248 + (7 * ratio), g2 = 195 - (95 * ratio), b2 = 205 - (105 * ratio);\n            wrapper.style.setProperty('--dynamic-bg-1', `rgba(${r1},${g1},${b1},0.85)`);\n            wrapper.style.setProperty('--dynamic-bg-2', `rgba(${r2},${g2},${b2},0.6)`);\n        }\n    };\n\n    const renderFluids = (charData) => {\n        const fluids = charData.体液状态 || {};\n        const melody = charData.体味旋律 || {};\n        const container = $('c-fluids-container');\n        \n        const bodyEl = $('c-melody-body');\n        const fluidEl = $('c-melody-fluid');\n        const tasteEl = $('c-melody-taste');\n        const tempBodyEl = $('c-melody-temp-body');\n        const tempTasteEl = $('c-melody-temp-taste');\n        \n        if(bodyEl) {\n            bodyEl.innerHTML = formatEmptyVal(melody.体香);\n            bodyEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.体香`);\n        }\n        if(fluidEl) {\n            fluidEl.innerHTML = formatEmptyVal(melody.体液香);\n            fluidEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.体液香`);\n        }\n        if(tasteEl) {\n            tasteEl.innerHTML = formatEmptyVal(melody.口感);\n            tasteEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.口感`);\n        }\n        \n        // 临时体香和临时口感处理\n        // 判断当前面板是否处于双击嵌入展开状态\n        const isEmbeddedOpen = container.style.display === 'grid' && !container.classList.contains('absolute-panel');\n\n        if(tempBodyEl) {\n            const tempBodyVal = melody.临时体香;\n            const isEmpty = !tempBodyVal || tempBodyVal === '无' || tempBodyVal === '未觉醒' || tempBodyVal === '未开发' || tempBodyVal === '未知';\n            \n            if (isEmpty && !isEmbeddedOpen) {\n                $('c-melody-temp-body-row').style.display = 'none';\n            } else {\n                $('c-melody-temp-body-row').style.display = 'flex';\n                tempBodyEl.innerHTML = formatEmptyVal(tempBodyVal);\n            }\n            tempBodyEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.临时体香`);\n        }\n        \n        if(tempTasteEl) {\n            const tempTasteVal = melody.临时口感;\n            const isEmpty = !tempTasteVal || tempTasteVal === '无' || tempTasteVal === '未觉醒' || tempTasteVal === '未开发' || tempTasteVal === '未知';\n            \n            if (isEmpty && !isEmbeddedOpen) {\n                $('c-melody-temp-taste-row').style.display = 'none';\n            } else {\n                $('c-melody-temp-taste-row').style.display = 'flex';\n                tempTasteEl.innerHTML = formatEmptyVal(tempTasteVal);\n            }\n            tempTasteEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.临时口感`);\n        }\n        \n        const prefixMap = {\n            '苏瑶': { 津液: '薄荷', 仙元: '薄荷', 灵泉: '薄荷茶芬', 兰露: '樱桃' },\n            '苏双双': { 津液: '玉兰', 仙元: '荔枝', 灵泉: '普洱茶芬', 兰露: '玉兰' },\n            '叶婉秋': { 津液: '玫瑰', 仙元: '玫瑰', 灵泉: '龙井茶芬', 兰露: '红酒' }\n        };\n        const pfx = prefixMap[AppState.activeChar] || { 津液: '', 仙元: '', 灵泉: '', 兰露: '' };\n        \n        let html = '';\n        const addTag = (lbl, val) => {\n            html += `<div class=\"data-tag\" style=\"flex-direction: row; justify-content: space-between; align-items: center; padding: 4px 8px;\"><span class=\"lbl\" style=\"margin-bottom: 0;\">${lbl}</span><span class=\"val val-pink-bold\">${formatEmptyVal(val)}</span></div>`;\n        };\n        \n        addTag(`${pfx.津液}津液`, fluids.津液);\n        addTag('腋下清汗', fluids.腋下清汗);\n        addTag('足汗油膏', fluids.足汗油膏);\n        addTag(`醇湿仙元`, fluids.醇湿仙元);\n        addTag(`骚香灵泉`, fluids.骚香灵泉);\n        addTag(`兰露肠液`, fluids.兰露肠液);\n        \n        container.innerHTML = html;\n    };\n\n    const renderEvo = (charData) => {\n        const evo = charData.部位进化 || {};\n        const container = $('c-evo-container');\n        let html = '';\n        \n        const getDisplayLevel = (val) => {\n            if (val >= 100) return 'MAX';\n            if (val >= 81) return 'Lv5';\n            if (val >= 41) return 'Lv4';\n            if (val >= 16) return 'Lv3';\n            if (val >= 11) return 'Lv2';\n            if (val >= 6) return 'Lv1';\n            return 'Lv0';\n        };\n        \n        const parts = ['香舌', '奶子', '小穴', '菊蕊'];\n        parts.forEach(p => {\n            const d = evo[p] || { 数值:0, _Lv:0, 状态:'未开发', 强化部位1:'无', 强化部位2:'无' };\n            const isMax = d.数值 >= 100;\n            const pct = isMax ? '100%' : (d.数值 % 100) + '%';\n            const maxClass = isMax ? 'is-max' : '';\n            const dropId = `drop-${p}`;\n            const displayLevel = getDisplayLevel(d.数值);\n            const levelStyle = isMax ? 'font-size: var(--fs-xs); color: var(--c-accent); text-shadow: 0 0 5px var(--c-accent);' : 'font-size: var(--fs-xs);';\n            \n            let displayName = p;\n            if (p === '奶子') {\n                const isNaiZi = localStorage.getItem('mvu_monitor_name_奶子') === 'true';\n                displayName = isNaiZi ? '奶子' : '双峦';\n            } else if (p === '小穴') {\n                const isXiaoXue = localStorage.getItem('mvu_monitor_name_小穴') === 'true';\n                displayName = isXiaoXue ? '小穴' : '仙脉';\n            }\n            \n            const formatEnhanceVal = (val) => {\n                if (!val || val === '无' || val === '未觉醒') return `<span class=\"text-neon-red\">&nbsp;</span>`;\n                return val;\n            };\n            \n            html += `\n                <div class=\"evo-container-item\" id=\"evo-item-${p}\">\n                    <div class=\"evo-flipper\">\n                        <!-- 正面 -->\n                        <div class=\"evo-front\">\n                            <div class=\"evo-top-row\">\n                                <div class=\"ring-wrapper ${maxClass}\" style=\"--pct: ${pct}; cursor: pointer;\" onclick=\"document.getElementById('evo-item-${p}').classList.toggle('flipped'); event.stopPropagation();\" title=\"点击翻转查看强化\">\n                                    <div class=\"ring-inner\" style=\"${levelStyle}\">${displayLevel}</div>\n                                </div>\n                                <div class=\"evo-name-row\"><span class=\"evo-part-name\" data-part=\"${p}\" style=\"cursor:pointer;\" title=\"双击切换名称\">${displayName}</span> <span class=\"text-bright-pink\">${d.数值}</span></div>\n                            </div>\n                            <div class=\"fancy-divider\"><span>·</span></div>\n                            <div class=\"evo-desc editable-text\" data-path=\"stat_data.角色.${AppState.activeChar}.部位进化.${p}.状态\" title=\"${d.状态}\">${formatEmptyVal(d.状态)}</div>\n                        </div>\n                        <!-- 背面 -->\n                        <div class=\"evo-back\" onclick=\"document.getElementById('evo-item-${p}').classList.toggle('flipped'); event.stopPropagation();\" title=\"点击翻转回正面\" style=\"cursor: pointer;\">\n                            <div class=\"fancy-divider fancy-divider-gold\" style=\"margin: 0 0 2px 0; font-size: var(--fs-xs);\"><span>强化</span></div>\n                            <div class=\"evo-enhance-item item-bubble\" style=\"justify-content: center;\"><span class=\"editable-text text-gold-flash\" data-path=\"stat_data.角色.${AppState.activeChar}.部位进化.${p}.强化部位1\" style=\"min-height: 1.2em; display: inline-block; overflow: hidden; text-overflow: ellipsis; text-align: center;\">${formatEnhanceVal(d.强化部位1)}</span></div>\n                            <div class=\"evo-enhance-item item-bubble\" style=\"justify-content: center;\"><span class=\"editable-text text-gold-flash\" data-path=\"stat_data.角色.${AppState.activeChar}.部位进化.${p}.强化部位2\" style=\"min-height: 1.2em; display: inline-block; overflow: hidden; text-overflow: ellipsis; text-align: center;\">${formatEnhanceVal(d.强化部位2)}</span></div>\n                        </div>\n                    </div>\n                </div>\n            `;\n        });\n        container.innerHTML = html;\n        bindEditableTexts(container);\n        \n        // 绑定双击切换名称事件\n        container.querySelectorAll('.evo-part-name').forEach(el => {\n            el.addEventListener('dblclick', (e) => {\n                e.stopPropagation();\n                const part = e.currentTarget.getAttribute('data-part');\n                if (part === '奶子' || part === '小穴') {\n                    const key = `mvu_monitor_name_${part}`;\n                    const current = localStorage.getItem(key) === 'true';\n                    localStorage.setItem(key, !current);\n                    renderUI();\n                }\n            });\n        });\n    };\n\n    const renderEditableBlocks = (charData) => {\n        const eq = charData.装备与心理 || {};\n        \n        // 装备 (3x2)\n        const eqCont = $('c-equip-container');\n        let eqHtml = '';\n        ['上身', '下身', '内衣', '内裤', '美腿', '玉足'].forEach(k => {\n            const val = eq[k];\n            eqHtml += `<div class=\"data-tag item-bubble\" style=\"flex-direction: row; justify-content: flex-start; align-items: center; gap: 4px;\"><span class=\"lbl\" style=\"margin-bottom: 0; min-width: 3em; text-align: left;\">${k}</span><span class=\"val editable-text val-pink-bold\" data-path=\"stat_data.角色.${AppState.activeChar}.装备与心理.${k}\" style=\"min-height: 1.2em; text-align: left;\">${formatEmptyVal(val)}</span></div>`;\n        });\n        eqCont.innerHTML = eqHtml;\n        \n        // 配饰 (2x4)\n        const accCont = $('c-acc-container');\n        let accHtml = '';\n        const rawAcc = eq.配饰 || [];\n        for(let i=0; i<8; i++) {\n            const val = rawAcc[i];\n            accHtml += `<div class=\"data-tag item-bubble\" style=\"justify-content: center;\"><span class=\"val editable-text val-pink-bold\" data-path=\"stat_data.角色.${AppState.activeChar}.装备与心理.配饰[${i}]\" style=\"min-height: 1.2em;\">${formatEmptyVal(val)}</span></div>`;\n        }\n        accCont.innerHTML = accHtml;\n        \n        // 性癖 (2x3)\n        const fetCont = $('c-fetish-container');\n        let fetHtml = '';\n        const rawFet = eq.性癖档案 || [];\n        for(let i=0; i<6; i++) {\n            const val = rawFet[i];\n            fetHtml += `<div class=\"data-tag item-bubble\" style=\"justify-content: center;\"><span class=\"val editable-text val-pink-bold\" data-path=\"stat_data.角色.${AppState.activeChar}.装备与心理.性癖档案[${i}]\" style=\"min-height: 1.2em;\">${formatEmptyVal(val)}</span></div>`;\n        }\n        fetCont.innerHTML = fetHtml;\n        \n        // 绑定双击编辑事件\n        $$('.editable-text').forEach(el => {\n            el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });\n            el.addEventListener('dblclick', function(e) {\n                e.preventDefault();\n                e.stopPropagation();\n                if(this.querySelector('input')) return;\n                const currentVal = this.textContent;\n                const path = this.getAttribute('data-path');\n                const inputVal = (currentVal === '\\xa0' || currentVal.trim() === '') ? '' : currentVal;\n                this.innerHTML = `<input type=\"text\" class=\"edit-input\" value=\"${inputVal}\">`;\n                const input = this.querySelector('input');\n                input.focus();\n                \n                // 阻止输入框内部点击冒泡\n                input.addEventListener('click', ev => ev.stopPropagation());\n                input.addEventListener('dblclick', ev => ev.stopPropagation());\n                \n                const save = () => {\n                    const newVal = input.value.trim() || '无';\n                    this.innerHTML = formatEmptyVal(newVal);\n                    const oldVal = (currentVal === '\\xa0' || currentVal.trim() === '') ? '无' : currentVal;\n                    if(newVal !== oldVal) {\n                        updateMvu(path, newVal, \"已更新\");\n                    }\n                };\n                input.addEventListener('blur', save);\n                input.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') input.blur(); });\n            });\n        });\n    };\n\n    const renderUI = () => {\n        if (!AppState.isReady || !AppState.mvuData) return;\n        \n        renderGlobal();\n        \n        const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});\n        renderImage(charData);\n        renderCore(charData);\n        renderEvo(charData);\n        renderFluids(charData);\n        renderEditableBlocks(charData);\n    };\n\n    // --- 交互绑定 ---\n    const bindEvents = () => {\n        // 全局点击关闭下拉菜单、Tooltip 和悬浮面板\n        document.addEventListener('click', (e) => {\n            if (!e.target.closest('.evo-container-item')) {\n                const flippedItems = $('c-evo-container')?.querySelectorAll('.evo-container-item.flipped');\n                if (flippedItems) {\n                    flippedItems.forEach(el => el.classList.remove('flipped'));\n                }\n            }\n            if (!e.target.closest('.tooltip')) {\n                $$('.tooltip.active-click').forEach(el => el.classList.remove('active-click'));\n            }\n            // 点击空白处关闭悬浮的体液面板\n            if (!e.target.closest('#melody-wrapper-div') && !e.target.closest('#c-fluids-container')) {\n                const fluidsContainer = $('c-fluids-container');\n                if (fluidsContainer && fluidsContainer.classList.contains('absolute-panel')) {\n                    fluidsContainer.style.display = 'none';\n                }\n            }\n        });\n\n        // Tooltip 单击开关 (常驻/取消)\n        $$('.tooltip').forEach(el => {\n            el.addEventListener('click', (e) => {\n                // 如果点击的是内部的可编辑文本、输入框或进度条本身，不触发 tooltip 切换\n                if (e.target.closest('.editable-text') || e.target.tagName === 'INPUT' || e.target.closest('.progress-track')) return;\n                \n                const isActive = el.classList.contains('active-click');\n                // 关闭其他\n                $$('.tooltip.active-click').forEach(t => {\n                    if (t !== el) t.classList.remove('active-click');\n                });\n                if (!isActive) {\n                    el.classList.add('active-click');\n                } else {\n                    el.classList.remove('active-click');\n                }\n            });\n        });\n\n        // 图片点击切图\n        $('c-image-zone').addEventListener('click', () => {\n            const images = CharImages[AppState.activeChar] || [];\n            if (images.length <= 1) return;\n            \n            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});\n            let imgIdx = _.get(charData, '装备与心理.当前图片索引', 0);\n            imgIdx = (imgIdx + 1) >= images.length ? 0 : imgIdx + 1;\n            \n            const path = `stat_data.角色.${AppState.activeChar}.装备与心理.当前图片索引`;\n            updateMvu(path, imgIdx); // 更新MVU并触发重绘\n        });\n\n        // 主题切换\n        $('toggle-theme').addEventListener('click', () => {\n            const wrapper = $('monitor-app');\n            const icon = $('toggle-theme').querySelector('i');\n            if (AppState.theme === 'light') {\n                AppState.theme = 'dark';\n                wrapper.classList.add('theme-dark');\n                icon.className = 'fas fa-sun';\n            } else {\n                AppState.theme = 'light';\n                wrapper.classList.remove('theme-dark');\n                icon.className = 'fas fa-moon';\n            }\n            localStorage.setItem('mvu_monitor_theme', AppState.theme);\n            renderUI();\n        });\n\n        // 最小化切换 (按钮点击)\n        $('toggle-min').addEventListener('click', (e) => {\n            e.stopPropagation();\n            const app = $('monitor-app');\n            app.classList.toggle('minimized');\n            const isMin = app.classList.contains('minimized');\n            localStorage.setItem('mvu_monitor_minimized', isMin);\n            const icon = $('toggle-min').querySelector('i');\n            icon.className = isMin ? 'fas fa-expand-arrows-alt' : 'fas fa-compress-alt';\n        });\n\n        // 最小化状态下点击整行展开\n        document.querySelector('.global-bar').addEventListener('click', (e) => {\n            const app = $('monitor-app');\n            if (app.classList.contains('minimized')) {\n                // 如果点击的是主题切换按钮，不在这里处理展开，让主题切换自己处理\n                if (e.target.closest('#toggle-theme')) return;\n                \n                app.classList.remove('minimized');\n                localStorage.setItem('mvu_monitor_minimized', false);\n                const icon = $('toggle-min').querySelector('i');\n                if(icon) icon.className = 'fas fa-compress-alt';\n            }\n        });\n        \n        // 装备栏折叠状态持久化\n        const equipDetails = $('c-equip-details');\n        if (equipDetails) {\n            equipDetails.addEventListener('toggle', () => {\n                localStorage.setItem('mvu_monitor_equip_open', equipDetails.open);\n            });\n        }\n        \n        // 配饰栏折叠状态持久化\n        const accDetails = $('c-acc-details');\n        if (accDetails) {\n            accDetails.addEventListener('toggle', () => {\n                localStorage.setItem('mvu_monitor_acc_open', accDetails.open);\n            });\n        }\n        \n        // 性癖档案折叠状态持久化\n        const fetishDetails = $('c-fetish-details');\n        if (fetishDetails) {\n            fetishDetails.addEventListener('toggle', () => {\n                localStorage.setItem('mvu_monitor_fetish_open', fetishDetails.open);\n            });\n        }\n\n        // Tab 切换\n        $$('.tab-btn[data-char]').forEach(btn => {\n            btn.addEventListener('click', (e) => {\n                $$('.tab-btn').forEach(b => b.classList.remove('active'));\n                e.currentTarget.classList.add('active');\n                AppState.activeChar = e.currentTarget.getAttribute('data-char');\n                renderUI();\n            });\n        });\n\n        // 爱意值升级\n        $('c-love-btn').addEventListener('click', async function() {\n            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});\n            const loveVal = _.get(charData, '好感与爱意.爱意值', 0);\n            if (loveVal >= 100) {\n                const pathBase = `stat_data.角色.${AppState.activeChar}.好感与爱意`;\n                const currentLv = _.get(charData, '好感与爱意.爱意等级', 0);\n                const nextLv = currentLv + 1;\n                \n                showFloatingNumber(this, '-100', 'neg');\n                const lvNode = $('c-love-lv').parentNode;\n                showFloatingNumber(lvNode, '+1 Lv', 'pos');\n                createHeartFountain(lvNode);\n\n                // 乐观更新本地数据\n                _.set(AppState.mvuData, `${pathBase}.爱意值`, loveVal - 100);\n                _.set(AppState.mvuData, `${pathBase}.爱意等级`, nextLv);\n                _.set(AppState.mvuData, `${pathBase}._爱意阶段称号`, getLoveTitle(nextLv));\n                renderUI();\n\n                if (typeof Mvu !== 'undefined' && typeof getCurrentMessageId === 'function') {\n                    const msgId = getCurrentMessageId();\n                    const data = Mvu.getMvuData({ type: 'message', message_id: msgId });\n                    if(data) {\n                        _.set(data, `${pathBase}.爱意值`, loveVal - 100);\n                        _.set(data, `${pathBase}.爱意等级`, nextLv);\n                        _.set(data, `${pathBase}._爱意阶段称号`, getLoveTitle(nextLv));\n                        await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });\n                        showToast(`升级成功！爱意等级达到 Lv${nextLv}`, \"success\");\n                        fetchMvuData();\n                        renderUI(); // 确保写回后再次刷新UI\n                    }\n                }\n            } else {\n                showToast(\"爱意值不足100，无法升级\", \"warning\");\n            }\n        });\n\n        // 好感度转化\n        $('c-favor-btn').addEventListener('click', async function() {\n            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});\n            const favor = _.get(charData, '好感与爱意.好感度', 0);\n            if (favor >= 105) {\n                const addLove = Math.floor(Math.random() * 7) + 4; // 4~10\n                const pathBase = `stat_data.角色.${AppState.activeChar}.好感与爱意`;\n                const currentLove = _.get(charData, '好感与爱意.爱意值', 0);\n                const totalLove = _.get(charData, '好感与爱意.累计爱意值', currentLove);\n                \n                showFloatingNumber(this, '-5', 'neg');\n                showFloatingNumber($('c-love-btn'), `+${addLove}`, 'pos');\n\n                // 乐观更新本地数据\n                _.set(AppState.mvuData, `${pathBase}.好感度`, favor - 5);\n                _.set(AppState.mvuData, `${pathBase}.爱意值`, currentLove + addLove);\n                _.set(AppState.mvuData, `${pathBase}.累计爱意值`, totalLove + addLove);\n                renderUI();\n\n                if (typeof Mvu !== 'undefined' && typeof getCurrentMessageId === 'function') {\n                    const msgId = getCurrentMessageId();\n                    const data = Mvu.getMvuData({ type: 'message', message_id: msgId });\n                    if(data) {\n                        _.set(data, `${pathBase}.好感度`, favor - 5);\n                        _.set(data, `${pathBase}.爱意值`, currentLove + addLove);\n                        _.set(data, `${pathBase}.累计爱意值`, totalLove + addLove);\n                        await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });\n                        showToast(`转化成功！爱意值 +${addLove}`, \"success\");\n                        fetchMvuData();\n                    }\n                }\n            } else {\n                showToast(\"好感度不足105，无法转化\", \"warning\");\n            }\n        });\n\n        // 体味旋律面板交互 (悬停悬浮，双击嵌入，双击关闭)\n        const melodySummary = $('melody-summary');\n        const fluidsContainer = $('c-fluids-container');\n        const melodyWrapper = $('melody-wrapper-div');\n\n        // 阻止点击面板内部冒泡到 document 导致关闭\n        fluidsContainer.addEventListener('click', (e) => e.stopPropagation());\n\n        // 悬停展示：仅当鼠标进入小气泡范围内时触发展开\n        melodySummary.addEventListener('mouseenter', (e) => {\n            if (fluidsContainer.style.display !== 'grid' || fluidsContainer.classList.contains('absolute-panel')) {\n                fluidsContainer.style.display = 'grid';\n                fluidsContainer.classList.add('absolute-panel');\n            }\n        });\n\n        // 移开隐藏：当鼠标离开气泡区域时，如果未进入展开面板，则隐藏\n        melodySummary.addEventListener('mouseleave', (e) => {\n            if (fluidsContainer.classList.contains('absolute-panel')) {\n                if (!e.relatedTarget || !e.relatedTarget.closest('#c-fluids-container')) {\n                    fluidsContainer.style.display = 'none';\n                }\n            }\n        });\n        \n        // 移开隐藏：当鼠标离开展开面板时，如果未进入气泡区域，则隐藏\n        fluidsContainer.addEventListener('mouseleave', (e) => {\n            if (fluidsContainer.classList.contains('absolute-panel')) {\n                if (!e.relatedTarget || !e.relatedTarget.closest('#melody-summary')) {\n                    fluidsContainer.style.display = 'none';\n                }\n            }\n        });\n\n        // 双击嵌入/关闭 (绑定在外层，整行可双击)\n        melodyWrapper.addEventListener('dblclick', (e) => {\n            if (e.target.closest('.editable-text') || e.target.tagName === 'INPUT') return;\n            \n            if (fluidsContainer.style.display === 'grid' && !fluidsContainer.classList.contains('absolute-panel')) {\n                // 当前是嵌入展开状态，双击关闭\n                fluidsContainer.style.display = 'none';\n                localStorage.setItem('mvu_monitor_fluids_open', 'false');\n            } else {\n                // 当前是悬浮或关闭状态，双击转为嵌入展开\n                fluidsContainer.style.display = 'grid';\n                fluidsContainer.classList.remove('absolute-panel');\n                localStorage.setItem('mvu_monitor_fluids_open', 'true');\n            }\n            // 触发重绘以更新临时标签的显示状态\n            renderUI();\n        });\n\n        // 敏感度切换\n        $('c-sense-btn').addEventListener('click', () => {\n            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});\n            const current = _.get(charData, '敏感度与境界.当前敏感度等级', '青涩');\n            const maxUnlocked = _.get(charData, '敏感度与境界._已解锁最高敏感度', '青涩');\n            \n            const maxIdx = SENSE_LEVELS.indexOf(maxUnlocked);\n            let curIdx = SENSE_LEVELS.indexOf(current);\n            \n            if (maxIdx === -1 || curIdx === -1) return;\n            \n            curIdx = (curIdx + 1) > maxIdx ? 0 : curIdx + 1;\n            const nextLevel = SENSE_LEVELS[curIdx];\n            \n            updateMvu(`stat_data.角色.${AppState.activeChar}.敏感度与境界.当前敏感度等级`, nextLevel, `已切换至: ${nextLevel}`);\n        });\n    };\n\n    // --- 初始化 ---\n    const init = async () => {\n        if (typeof waitGlobalInitialized === 'function') {\n            await waitGlobalInitialized('Mvu');\n        }\n\n        const savedTheme = localStorage.getItem('mvu_monitor_theme');\n        if (savedTheme === 'dark') {\n            AppState.theme = 'dark';\n            $('monitor-app').classList.add('theme-dark');\n            const themeIcon = $('toggle-theme')?.querySelector('i');\n            if(themeIcon) themeIcon.className = 'fas fa-sun';\n        }\n        \n        // 读取最小化状态 (默认最小化)\n        const savedMin = localStorage.getItem('mvu_monitor_minimized');\n        const isMin = savedMin === null ? true : savedMin === 'true';\n        if (isMin) {\n            $('monitor-app').classList.add('minimized');\n            const minIcon = $('toggle-min')?.querySelector('i');\n            if(minIcon) minIcon.className = 'fas fa-expand-arrows-alt';\n        }\n        \n        // 读取装备栏折叠状态 (默认折叠)\n        const savedEquipOpen = localStorage.getItem('mvu_monitor_equip_open');\n        const equipDetails = $('c-equip-details');\n        if (equipDetails) {\n            if (savedEquipOpen === 'true') {\n                equipDetails.setAttribute('open', '');\n            } else {\n                equipDetails.removeAttribute('open');\n            }\n        }\n\n        // 读取配饰栏折叠状态 (默认折叠)\n        const savedAccOpen = localStorage.getItem('mvu_monitor_acc_open');\n        const accDetails = $('c-acc-details');\n        if (accDetails) {\n            if (savedAccOpen === 'true') {\n                accDetails.setAttribute('open', '');\n            } else {\n                accDetails.removeAttribute('open');\n            }\n        }\n\n        // 读取性癖档案折叠状态 (默认折叠)\n        const savedFetishOpen = localStorage.getItem('mvu_monitor_fetish_open');\n        const fetishDetails = $('c-fetish-details');\n        if (fetishDetails) {\n            if (savedFetishOpen === 'true') {\n                fetishDetails.setAttribute('open', '');\n            } else {\n                fetishDetails.removeAttribute('open');\n            }\n        }\n        \n        // 读取体液面板折叠状态 (默认折叠)\n        const savedFluidsOpen = localStorage.getItem('mvu_monitor_fluids_open');\n        const fluidsContainer = $('c-fluids-container');\n        if (fluidsContainer && savedFluidsOpen === 'true') {\n            fluidsContainer.style.display = 'grid';\n            fluidsContainer.classList.remove('absolute-panel');\n        }\n\n        if (fetchMvuData()) {\n            AppState.isReady = true;\n            createParticles();\n            bindEvents();\n            renderUI();\n            \n            if (typeof eventOn === 'function' && typeof Mvu !== 'undefined') {\n                eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {\n                    if(fetchMvuData()) renderUI();\n                });\n            }\n        } else {\n            $('monitor-app').innerHTML = '<div style=\"padding:20px;text-align:center;color:red;\">MVU变量系统未就绪或未找到数据，请确保已正确配置并初始化变量。</div>';\n        }\n    };\n\n    setTimeout(init, 100);\n\n})();\n</script>\n</body>\n</html>\n```",
-    "placement": [
-        2
-    ],
-    "substituteRegex": 0,
-    "minDepth": null,
-    "maxDepth": null,
-    "markdownOnly": true,
-    "promptOnly": false
-}
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>末日堡垒状态栏V2=3.2</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- 基础变量与主题 (紧凑化、字体的统一、字号增大) --- */
+        :root {
+            /* 亮色主题 (默认) */
+            --c-main: #93011e;
+            --c-sub: #F8C3CD;
+            --c-accent: #e7234a;
+            --c-bg-base: #FFF0F5;
+            --c-text-dark: #4a000f;
+            --c-text-light: #fff;
+            --c-panel-bg: rgba(255,255,255,0.5);
+            --c-panel-border: rgba(255,255,255,0.6);
+            --c-tab-bg: rgba(255,255,255,0.4);
+            --c-tag-bg: rgba(255,255,255,0.8);
+            --c-dropdown-bg: rgba(255,255,255,0.95);
+            --c-melody-bg: rgba(255,255,255,0.5);
+
+            /* 动态背景色 */
+            --dynamic-bg-1: rgba(255, 240, 245, 0.85);
+            --dynamic-bg-2: rgba(248, 195, 205, 0.6);
+
+            /* 统一字体为楷体 */
+            --font-body: 'KaiTi', 'STKaiti', serif, system-ui, -apple-system;
+
+            /* --- 5级响应式字号阶梯 (Type Scale) --- */
+            --fs-xl: clamp(10px, 3.5cqw, 16px); /* L1: 重点标题 (如：Tab/苏瑶、苏双双) */
+            --fs-lg: clamp(12px, 3cqw, 18px);   /* L2: 角色姓名“瑶瑶”、极重要数值 */
+            --fs-md: clamp(10px, 2.5cqw, 16px); /* L3: 数据标签、模块标题、强调文字 */
+            --fs-md-accent: clamp(10px, 2.5cqw, 16px); /* L3.1: 特殊颜色数值 */
+            --fs-sm: clamp(9px, 2.2cqw, 14px); /* L4: 变量/标准正文/次要信息 */
+            --fs-sm-label: clamp(9px, 2.2cqw, 14px); /* L4.1: 固定名称 */
+            --fs-xs: clamp(10px, 1.8cqw, 14px); /* L5: 微型角标/小标签/ 提示/Tooltip */
+
+            --radius-lg: clamp(12px, 3cqw, 20px);
+            --radius-md: clamp(8px, 2cqw, 12px);
+            --radius-sm: clamp(4px, 1cqw, 8px);
+
+            /* 间距调整为3px */
+            --space-lg: 6px;
+            --space-md: 4px;
+            --space-sm: 3px;
+
+            --shadow-pearl:
+                inset 0 0 10px rgba(255,255,255,0.8),
+                inset 0 0 20px rgba(248,195,205,0.3),
+                0 4px 15px rgba(147,1,30,0.1);
+            --shadow-text-glow: 0 0 8px rgba(231,35,74,0.6);
+
+            --transition-base: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* 暗色主题 */
+        .mvu-monitor-wrapper.theme-dark {
+            --c-main: #ff8fa3;
+            --c-sub: #590d22;
+            --c-accent: #ff4d6d;
+            --c-bg-base: #1a050a;
+            --c-text-dark: #fff0f3;
+            --c-text-light: #fff;
+            --c-panel-bg: rgba(20, 5, 10, 0.6);
+            --c-panel-border: rgba(255, 77, 109, 0.3);
+            --c-tab-bg: rgba(40, 10, 20, 0.6);
+            --c-tag-bg: rgba(30, 5, 15, 0.8);
+            --c-dropdown-bg: rgba(20, 5, 10, 0.95);
+            --c-melody-bg: rgba(30, 5, 15, 0.5);
+
+            --shadow-pearl:
+                inset 0 0 10px rgba(255,77,109,0.2),
+                inset 0 0 20px rgba(0,0,0,0.8),
+                0 4px 15px rgba(0,0,0,0.5);
+            --shadow-text-glow: 0 0 10px rgba(255,77,109,0.8);
+        }
+
+        /* --- 全局重置与容器 --- */
+        .mvu-monitor-wrapper {
+            container-type: inline-size;
+            width: 100%;
+            max-width: 1000px;
+            margin: 5px auto;
+            font-family: var(--font-body);
+            color: var(--c-text-dark);
+            line-height: 1.3;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--dynamic-bg-1), var(--dynamic-bg-2));
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            /* 边框呼吸特效：暗金与暗红交替，5秒周期 */
+            border: 2px solid #8b0000;
+            box-shadow: var(--shadow-pearl);
+            padding: 8px; /* 边距翻倍 */
+            transition: background 1s ease;
+            animation: border-breathe 5s infinite ease-in-out;
+        }
+
+        @keyframes border-breathe {
+            0%, 100% { border-color: #8b0000; box-shadow: var(--shadow-pearl), 0 0 8px #8b0000; }
+            50% { border-color: #b8860b; box-shadow: var(--shadow-pearl), 0 0 15px #b8860b; }
+        }
+
+        .mvu-monitor-wrapper * { box-sizing: border-box; }
+
+        /* --- 蕾丝边框装饰 --- */
+        .lace-border {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="20" viewBox="0 0 40 20"><path d="M0,20 Q10,0 20,20 Q30,0 40,20" fill="none" stroke="rgba(248,195,205,0.5)" stroke-width="2"/></svg>');
+            background-repeat: repeat-x;
+            background-position: top;
+            opacity: 0.7;
+        }
+
+        /* --- 粒子动画 --- */
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(248,195,205,0) 70%);
+            border-radius: 50%;
+            animation: float-up linear infinite;
+        }
+        @keyframes float-up {
+            0% { transform: translateY(100%) scale(0.5); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
+        }
+
+        /* --- 布局通用类 --- */
+        .flex-row { display: flex; align-items: center; gap: var(--space-sm); }
+        .flex-col { display: flex; flex-direction: column; gap: var(--space-sm); }
+        .z-content { position: relative; z-index: 1; }
+
+        /* --- 第一行：全局信息栏 (狭窄) --- */
+        .global-bar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--c-panel-bg);
+            padding: var(--space-sm) var(--space-md);
+            border-radius: var(--radius-md);
+            font-size: var(--fs-xs);
+            margin-bottom: var(--space-sm);
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+            border: 1px solid var(--c-panel-border);
+        }
+        .global-item { display: flex; align-items: center; gap: 4px; }
+        .global-item i { color: var(--c-main); }
+        .min-btn { cursor: pointer; color: var(--c-main); transition: var(--transition-base); padding: 0 4px; }
+        .min-btn:hover { transform: scale(1.1); }
+
+        .mvu-monitor-wrapper.minimized .hide-on-min { display: none !important; }
+        .mvu-monitor-wrapper.minimized .global-bar { cursor: pointer; }
+
+        /* --- 第二行：顶部导航 Tab --- */
+        .nav-tabs {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-sm);
+            border-bottom: 2px solid var(--c-panel-border);
+            padding-bottom: var(--space-sm);
+            overflow-x: auto;
+            scrollbar-width: none;
+        }
+        .nav-tabs .flex-row:last-child {
+            margin-left: auto;
+        }
+        .nav-tabs::-webkit-scrollbar { display: none; }
+        .tab-btn {
+            padding: 0 clamp(8px, 1.5cqw, 12px); /* 减少高度 */
+            border-radius: var(--radius-lg);
+            background: var(--c-tab-bg);
+            border: 1px solid var(--c-panel-border);
+            color: var(--c-main);
+            font-weight: bold;
+            font-size: var(--fs-xl);
+            cursor: pointer;
+            transition: var(--transition-base);
+            white-space: nowrap;
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.2);
+        }
+        .tab-btn:hover { filter: brightness(1.2); transform: translateY(-1px); }
+        .tab-btn.active {
+            background: var(--c-main);
+            color: var(--c-text-light);
+            box-shadow: var(--shadow-text-glow);
+            border-color: var(--c-accent);
+        }
+
+        /* --- 第三区块：核心仪表盘 (左图右数据) --- */
+        .core-dashboard {
+            background: var(--c-panel-bg);
+            border-radius: var(--radius-md);
+            padding: var(--space-md);
+            border: 1px solid var(--c-panel-border);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            grid-template-areas: 
+                "img data"
+                "img evo";
+            gap: 3px; /* 缩小左右间距 */
+            margin-bottom: var(--space-sm);
+        }
+        
+        /* 增加特定区块距离边框的距离 */
+        .core-dashboard, #melody-wrapper-div, #c-equip-details, #c-fetish-details {
+            margin-left: 4px;
+            margin-right: 4px;
+        }
+        
+        /* 左侧图片展示区 */
+        .core-image-zone {
+            grid-area: img;
+            width: calc(26cqw - 70px); /* 增加宽度，给图片腾出空间 */
+            min-width: 70px; /* 设定一个极限最小宽度防止崩溃 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: var(--radius-md);
+            border: 2px solid rgba(248,195,205,0.8);
+            box-shadow: var(--shadow-pearl);
+            background: rgba(0,0,0,0.05);
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+        }
+        .core-image-zone img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 填满容器，上下不留白，保持原始比例裁剪 */
+            transition: opacity 0.2s;
+        }
+        .core-image-zone:active img { opacity: 0.8; }
+
+        /* 右侧数据区 */
+        .core-data-zone {
+            grid-area: data;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* 向上对齐 */
+            gap: 3px; /* 极小间距 */
+            min-width: 0;
+        }
+        
+        /* 灵动岛气泡样式 */
+        .island-pill {
+            background: var(--c-tag-bg);
+            border: 1px solid var(--c-panel-border);
+            border-radius: 20px;
+            padding: 1px 6px; /* 减小内边距 */
+            display: inline-flex;
+            align-items: center;
+            gap: 3px; /* 减小间距 */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+        
+        /* 行1：A区 */
+        .dash-row-1 {
+            display: flex;
+            flex-wrap: wrap; /* 允许换行以适配手机 */
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+        
+        /* 进度条组合 */
+        .progress-row {
+            display: flex;
+            align-items: center;
+            gap: 1cqw; /* 使用容器单位 */
+            width: 100%;
+            position: relative;
+        }
+        .progress-label-group {
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+            width: auto; /* 移除固定容器单位宽度，改为自适应 */
+            min-width: max-content; /* 确保文字内容完整显示，不被压缩换行 */
+            flex-shrink: 0;
+            font-size: clamp(10px, 2.2cqw, 17px); /* 进一步减小下限，增强缩放能力 */
+            font-weight: bold;
+            color: var(--c-main);
+            white-space: nowrap;
+        }
+        .progress-track {
+            flex-grow: 1; height: 5px;
+            min-width: 8px; /* 允许进度条在极窄屏幕下缩短，把空间让给数值 */
+            background: rgba(248,195,205,0.3);
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 5px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+        .progress-fill::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        
+        .fill-magenta { background: linear-gradient(90deg, #ff00ff, #c71585); }
+        .fill-pink { background: linear-gradient(90deg, #ffb7c5, #ff6b81); }
+        .fill-gold { background: linear-gradient(90deg, #f6d365, #fda085); }
+
+        /* 交互提示 */
+        .clickable { cursor: pointer; transition: var(--transition-base); }
+        .clickable:hover { transform: scale(1.02); color: var(--c-accent); }
+        .clickable:active { transform: scale(0.98); }
+
+        /* --- 折叠面板 (Details) --- */
+        .panel-details {
+            background: var(--c-panel-bg);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--space-sm);
+            border: 1px solid var(--c-panel-border);
+            position: relative;
+        }
+        
+        /* 绝对定位悬浮面板 */
+        .absolute-panel {
+            position: absolute !important;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            z-index: 200;
+            background: var(--c-panel-bg);
+            border: 1px solid var(--c-panel-border);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .panel-summary {
+            border-radius: var(--radius-md);
+            padding: var(--space-sm) var(--space-md);
+            font-weight: bold;
+            color: var(--c-main);
+            cursor: pointer;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--c-tab-bg);
+            transition: var(--transition-base);
+            font-size: var(--fs-md);
+        }
+        .panel-summary::-webkit-details-marker, .melody-summary::-webkit-details-marker, #c-acc-details summary::-webkit-details-marker { display: none; }
+        .panel-summary:hover { filter: brightness(1.1); }
+        .panel-summary i { transition: transform 0.3s; }
+        .panel-details[open] .panel-summary i { transform: rotate(180deg); }
+        .panel-details[open] .panel-summary { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+        .panel-content {
+            padding: 10px;
+        }
+
+        /* --- 数据标签项 --- */
+        .data-tag {
+            background: var(--c-tag-bg);
+            padding: clamp(2px, 0.5cqw, 4px) clamp(4px, 1cqw, 8px);
+            border-radius: var(--radius-sm);
+            font-size: var(--fs-md);
+            border: 1px solid var(--c-panel-border);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            justify-content: center;
+        }
+        .data-tag .lbl { color: var(--c-main); font-size: 1em; margin-bottom: 2px; opacity: 0.9; text-align: center; font-weight: bold; }
+        .data-tag .val { font-weight: 500; text-align: center; word-break: break-word; }
+        
+        /* 双击编辑输入框 */
+        .edit-input {
+            width: 100%;
+            background: rgba(255,255,255,0.9);
+            border: 1px solid var(--c-accent);
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-family: inherit;
+            font-size: inherit;
+            color: inherit;
+            outline: none;
+            text-align: center;
+        }
+
+        /* --- 部位进化环形进度 (紧凑版 & 3D翻转) --- */
+        .evo-grid-compact {
+            grid-area: evo;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr)); /* 强制4列 */
+            gap: 2px; /* 间距缩小为2px */
+            width: 100%;
+            justify-content: end; /* 右对齐 */
+        }
+        
+        /* 手机端窄屏适配 */
+        @media (max-width: 550px) {
+            .mvu-monitor-wrapper { padding: 4px; }
+            .core-dashboard, #melody-wrapper-div, #c-equip-details, #c-fetish-details {
+                margin-left: 1px !important;
+                margin-right: 1px !important;
+            }
+            .global-bar { align-items: flex-start; }
+            .global-left { flex-direction: column; align-items: flex-start; gap: 2px; }
+            .global-left .global-item { margin-left: 0 !important; }
+            
+            .core-dashboard {
+                grid-template-areas: 
+                    "img data"
+                    "evo evo";
+            }
+            .evo-grid-compact {
+                grid-template-columns: repeat(2, minmax(0, 1fr)); /* 变成2x2显示 */
+                justify-content: center;
+                gap: 1px; /* 缩小垂直间距尽量紧凑 */
+            }
+            .evo-front {
+                min-height: auto; /* 移除最小高度限制，完全由内容撑开 */
+                padding: 2px 2px 1px 2px; /* 顶部/左右2px，底部留1px */
+                justify-content: flex-start;
+                gap: 0; /* 移除gap，通过margin精确控制 */
+            }
+            .evo-front .evo-top-row {
+                gap: 2px; /* 缩小环和文字的间距 */
+                margin-bottom: 1px; /* 距离分割线1px */
+            }
+            /* 缩小内部三行元素的垂直间距，并使分割线更细 */
+            .evo-front .fancy-divider {
+                margin: 0; /* 移除外边距 */
+                height: 2px; /* 限制整体高度 */
+                min-height: 2px;
+            }
+            .evo-front .fancy-divider::before,
+            .evo-front .fancy-divider::after {
+                height: 1px;
+                transform: scaleY(0.5); /* 视觉上更细 */
+            }
+            .evo-front .fancy-divider span {
+                padding: 0;
+                line-height: 0.5;
+                font-size: 8px; /* 缩小中间的点 */
+            }
+            .evo-front .evo-desc {
+                flex-grow: 0; /* 防止撑开剩余空间 */
+                min-height: auto;
+                line-height: 1;
+                padding: 0;
+                margin: 1px 0 0 0; /* 上侧距离分割线1px，下侧距离底线由父级padding-bottom控制 */
+                font-size: 10px; /* 修复字体过大问题，确保紧凑 */
+            }
+        }
+        .evo-container-item {
+            perspective: 1000px;
+            position: relative;
+            min-width: 0;
+            height: 100%;
+        }
+        .evo-flipper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .evo-container-item.flipped .evo-flipper {
+            transform: rotateY(180deg);
+        }
+        .evo-front, .evo-back {
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            background: var(--c-tag-bg);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--c-panel-border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin: 0 4px;
+            width: calc(100% - 8px);
+        }
+        .evo-front {
+            position: relative;
+            min-height: 45px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2px;
+            padding-bottom: 2px;
+            z-index: 2;
+        }
+        .evo-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: stretch;
+            padding: 8px;
+            gap: 8px;
+            font-size: var(--fs-xs);
+        }
+        .evo-enhance-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 0 4px;
+            border-radius: var(--radius-sm);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .evo-top-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1cqw;
+            width: 100%;
+            flex-wrap: wrap;
+        }
+        .ring-wrapper {
+            position: relative;
+            width: 6cqw; height: 6cqw; /* 纯容器单位，完美等比 */
+            min-width: 24px; min-height: 24px;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            background: conic-gradient(var(--c-accent) var(--pct), var(--c-panel-border) 0);
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+            flex-shrink: 0;
+        }
+        .ring-inner {
+            width: calc(100% - 4px); height: calc(100% - 4px);
+            background: var(--c-tag-bg);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-weight: bold; color: var(--c-main);
+            font-size: clamp(8px, 1.5cqw, 14px);
+        }
+        /* 标题与数值同行 */
+        .evo-name-row { 
+            display: flex; align-items: center; justify-content: center; gap: 2px; 
+            font-weight: bold; font-size: clamp(10px, 2cqw, 22px); color: var(--c-main); 
+            white-space: nowrap;
+        }
+        
+        /* 分割线增强 (通用) */
+        .fancy-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1px;
+            width: 100%;
+            margin: 2px 0;
+            color: var(--c-accent);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .fancy-divider::before,
+        .fancy-divider::after {
+            content: '';
+            flex-grow: 1;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--c-accent));
+            opacity: 0.6;
+        }
+        .fancy-divider::after {
+            background: linear-gradient(270deg, transparent, var(--c-accent));
+        }
+        .fancy-divider span {
+            line-height: 1.2;
+            padding: 2px 0;
+            white-space: nowrap;
+        }
+        
+        /* 金色分割线 (用于强化标题) */
+        .fancy-divider-gold {
+            color: #ffd700;
+            text-shadow: 0 0 3px rgba(255, 215, 0, 0.5);
+        }
+        .fancy-divider-gold::before {
+            background: linear-gradient(90deg, transparent, #ffd700);
+        }
+        .fancy-divider-gold::after {
+            background: linear-gradient(270deg, transparent, #ffd700);
+        }
+
+        .evo-desc { 
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px; color: var(--c-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: bold; max-width: 100%; text-align: center; 
+            min-height: 1.2em;
+        }
+
+        /* --- 实时内心气泡 --- */
+        .thought-bubble {
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            background: var(--c-tag-bg);
+            border: 1px solid var(--c-panel-border);
+            border-radius: 12px;
+            padding: 2px 6px; /* 减小内边距 */
+            margin-top: 0;
+            margin-bottom: 0;
+            font-style: italic;
+            color: var(--c-main);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            animation: breathe 4s ease-in-out infinite;
+            font-size: var(--fs-sm);
+            width: 100%;
+            line-height: 1.2; /* 减小行高 */
+        }
+        .thought-bubble::before {
+            content: ''; position: absolute; top: 50%; left: -10px;
+            transform: translateY(-50%);
+            border-width: 8px 10px 8px 0;
+            border-style: solid;
+            border-color: transparent var(--c-tag-bg) transparent transparent;
+        }
+        @keyframes breathe {
+            0%, 100% { transform: translateY(0); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+            50% { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+        }
+        
+        /* --- 悬浮提示 Tooltip 优化 --- */
+        .tooltip { position: relative; display: inline-flex; align-items: center; cursor: pointer; }
+        .tooltip .tooltiptext {
+            visibility: hidden; width: max-content; max-width: 250px; 
+            background-color: var(--c-bg-base); color: var(--c-text-dark);
+            border: 1px solid var(--c-panel-border);
+            text-align: left; border-radius: 6px; padding: 6px 10px; position: absolute;
+            z-index: 9999; bottom: 125%; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.2s; font-size: var(--fs-xs); font-weight: normal;
+            white-space: pre-wrap; line-height: 1.4; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .tooltip:hover .tooltiptext, .tooltip.active-click .tooltiptext { visibility: visible; opacity: 1; }
+        
+        .melody-pill { background: var(--c-melody-bg) !important; }
+        
+        /* 进度条说明：向右对齐，与进度条上侧对齐（同行） */
+        .tooltip-right .tooltiptext {
+            left: auto; right: 0; transform: none; bottom: 100%; margin-bottom: 2px;
+        }
+        
+        /* 体味旋律左对齐列表 (同行显示) */
+        .melody-list {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 4px;
+            width: fit-content; /* 紧密包裹，限制悬停触发区域 */
+            margin-left: 6px; /* 增加左侧缩进 */
+        }
+        .melody-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start; /* 左对齐 */
+            gap: 0;
+            font-size: var(--fs-sm);
+            white-space: nowrap;
+            width: fit-content; /* 紧密包裹 */
+            padding: 2px 6px;
+        }
+        /* 防止极简介绍超出右侧边框 */
+        .tooltip-left-expand .tooltiptext {
+            left: auto; right: 0; transform: none;
+        }
+        
+        /* 进度条 MAX 呼吸特效 */
+        .ring-wrapper.is-max {
+            animation: ring-breathe 2s infinite alternate;
+        }
+        @keyframes ring-breathe {
+            from { box-shadow: 0 0 5px var(--c-accent), inset 0 0 5px var(--c-accent); }
+            to { box-shadow: 0 0 15px var(--c-accent), inset 0 0 15px var(--c-accent); }
+        }
+
+        /* 呼吸感荧光红 (用于空值) */
+        .text-neon-red {
+            color: #ff003c;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ff003c, 0 0 10px #ff003c;
+            animation: neon-breathe 2s infinite alternate;
+        }
+        @keyframes neon-breathe {
+            from { text-shadow: 0 0 5px #ff003c, 0 0 10px #ff003c; opacity: 0.8; }
+            to { text-shadow: 0 0 10px #ff003c, 0 0 20px #ff003c; opacity: 1; }
+        }
+        
+        /* 金色闪光 */
+        .text-gold-flash {
+            color: #ffd700;
+            font-weight: bold;
+            text-shadow: 0 0 5px #ffd700;
+            animation: gold-flash 1.5s infinite;
+        }
+        @keyframes gold-flash {
+            0%, 100% { opacity: 1; text-shadow: 0 0 5px #ffd700; }
+            50% { opacity: 0.6; text-shadow: 0 0 15px #ffd700, 0 0 20px #fff; }
+        }
+        
+        /* 亮粉色 (与圆融青涩同色) */
+        .text-bright-pink {
+            color: var(--c-accent);
+            font-weight: bold;
+        }
+
+        /* 待更新内容统一格式 (以圆融为标准) */
+        .val-pink-bold {
+            color: var(--c-accent);
+            font-weight: bold;
+            text-align: center;
+            font-size: var(--fs-sm);
+        }
+
+        /* 装备、配饰、性癖通用气泡样式 (状态平台底色) */
+        .item-bubble {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.5), rgba(248, 195, 205, 0.3));
+            border: none !important;
+            box-shadow: 0 0 2px rgba(255, 255, 255, 0.4), inset 0 0 4px rgba(255, 255, 255, 0.3) !important;
+            transition: var(--transition-base);
+        }
+        .theme-dark .item-bubble {
+            background: linear-gradient(90deg, rgba(50, 6, 15, 0.8), rgba(30, 3, 9, 0.7));
+            box-shadow: 0 0 2px rgba(255, 143, 163, 0.2), inset 0 0 4px rgba(255, 77, 109, 0.15) !important;
+        }
+        .item-bubble:hover {
+            filter: brightness(1.15);
+            transform: translateY(-1px);
+        }
+
+        /* 飘字动画特效 */
+        .floating-number {
+            position: absolute;
+            font-weight: bold;
+            font-size: 18px;
+            pointer-events: none;
+            z-index: 1000;
+            animation: float-up-fade 1.5s ease-out forwards;
+        }
+        .float-pos { color: #34c759; text-shadow: 0 0 5px #fff; }
+        .float-neg { color: #ff3b30; text-shadow: 0 0 5px #fff; }
+        @keyframes float-up-fade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            50% { transform: translateY(-20px) scale(1.2); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1); }
+        }
+
+        /* 爱意喷泉特效 */
+        .heart-fountain {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 0; height: 0;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: visible;
+        }
+        .heart-particle {
+            position: absolute;
+            color: #ff003c;
+            font-size: 18px;
+            text-shadow: 0 0 5px #ff003c;
+            animation: fountain-burst 2s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes fountain-burst {
+            0% { transform: translate(0, 0) scale(0.5) rotate(0deg); opacity: 1; }
+            50% { opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity: 0; }
+        }
+
+        /* --- 评价等级特效 --- */
+        /* SSS：金色流光，细亮粉色描边 */
+        .rank-sss {
+            font-size: var(--fs-md) !important; /* 比当前大一号 */
+            background: linear-gradient(90deg, #ffd700, #ffdf00, #ffae42, #ffd700);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-stroke: 0.5px #ffb7c5;
+            text-shadow: 0 0 5px rgba(255, 183, 197, 0.8);
+            animation: shine 2s linear infinite;
+        }
+
+        /* SSS+：金红色流光，细亮白色描边，粒子光效 */
+        .rank-sss-plus {
+            font-size: var(--fs-md) !important;
+            background: linear-gradient(90deg, #ff4500, #ff8c00, #ff4500);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-stroke: 0.5px #ffffff;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.9), 0 0 15px rgba(255, 69, 0, 0.8);
+            animation: shine 1.5s linear infinite;
+            position: relative;
+        }
+
+        /* 粒子光效模拟 */
+        .rank-sss-plus::before, .rank-sss-plus::after {
+            content: '✦';
+            position: absolute;
+            color: #fff;
+            font-size: 10px;
+            -webkit-text-stroke: 0;
+            text-shadow: 0 0 5px #fff, 0 0 10px #ff4500;
+            animation: sparkle 1s infinite alternate;
+            pointer-events: none;
+        }
+        .rank-sss-plus::before { top: -8px; left: -5px; animation-delay: 0s; }
+        .rank-sss-plus::after { bottom: -8px; right: -5px; animation-delay: 0.5s; }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
+        }
+        @keyframes sparkle {
+            0% { opacity: 0; transform: scale(0.5) rotate(0deg); }
+            100% { opacity: 1; transform: scale(1.2) rotate(90deg); }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="mvu-monitor-wrapper" id="monitor-app">
+    <div class="lace-border"></div>
+    <div class="particles" id="particles-container"></div>
+
+    <div class="z-content">
+        <!-- 第一行：全局信息 (狭窄) -->
+        <div class="global-bar">
+            <div class="flex-row global-left">
+                <div class="global-item"><span id="g-datetime">--年--月--日 --点--分 周-</span></div>
+                <div class="global-item" style="margin-left: 8px;"><i class="fas fa-map-marker-alt"></i> <span id="g-loc">未知</span></div>
+            </div>
+            <div class="flex-row global-right">
+                <div class="global-item"><i class="fas fa-coins"></i> <span id="g-cash">0</span>元</div>
+                <div class="global-item"><i class="fas fa-star"></i> <span id="g-score">0</span>点</div>
+                <div class="min-btn" id="toggle-theme" title="切换风格"><i class="fas fa-moon"></i></div>
+                <div class="min-btn" id="toggle-min" title="最小化"><i class="fas fa-compress-alt"></i></div>
+            </div>
+        </div>
+
+        <!-- 第二行：顶部导航 Tab -->
+        <div class="nav-tabs hide-on-min" id="nav-tabs">
+            <div class="flex-row" style="overflow-x: auto; scrollbar-width: none;">
+                <div class="tab-btn active" data-char="苏瑶">苏瑶</div>
+                <div class="tab-btn" data-char="苏双双">苏双双</div>
+                <div class="tab-btn" data-char="叶婉秋">叶婉秋</div>
+                <div class="tab-btn tooltip" style="opacity:0.5; cursor:not-allowed;">+<span class="tooltiptext">预留新角色</span></div>
+            </div>
+            <div class="flex-row">
+                <div class="tab-btn tooltip" style="opacity:0.5; cursor:not-allowed; font-size: var(--fs-md);"><i class="fas fa-tshirt"></i><span class="tooltiptext">衣柜(预留)</span></div>
+                <div class="tab-btn tooltip" style="opacity:0.5; cursor:not-allowed; font-size: var(--fs-md);"><i class="fas fa-store"></i><span class="tooltiptext">商城(预留)</span></div>
+            </div>
+        </div>
+
+        <!-- 第三区块：核心仪表盘 (左图右数据) -->
+        <div class="core-dashboard hide-on-min">
+            <!-- 左侧图片展示区 -->
+            <div class="core-image-zone" id="c-image-zone" title="点击切换图片">
+                <img id="c-image" src="" alt="角色图片">
+            </div>
+            
+            <!-- 右侧数据区 -->
+            <div class="core-data-zone">
+                <!-- 行1：名称 & 评价 & 敏感度 -->
+                <div class="dash-row-1" style="justify-content: space-between;">
+                    <div style="display: flex; gap: 4px;">
+                        <div class="island-pill">
+                            <span style="font-size: calc(var(--fs-lg) + 2px); font-weight: bold; color: var(--c-main); white-space: nowrap;">
+                                <span id="c-nickname">瑶瑶</span>
+                            </span>
+                        </div>
+                        <div class="island-pill">
+                            <span id="c-melody-rank" style="font-size: var(--fs-sm); font-weight: bold; color: var(--c-accent); white-space: nowrap;">SS</span>
+                        </div>
+                    </div>
+                    <div class="island-pill clickable tooltip" id="c-sense-btn" style="font-size: var(--fs-sm); font-weight: bold; color: var(--c-main); flex-shrink: 0;">
+                        敏感度等级：<span id="c-sense-val" style="color: var(--c-accent);">青涩</span>
+                        <span class="tooltiptext">单击循环切换</span>
+                    </div>
+                </div>
+                
+                <!-- 行2：称号 & 境界与小属性 -->
+                <div class="dash-row-1" style="justify-content: space-between; margin-top: 0;">
+                    <div class="island-pill" style="font-size: calc(var(--fs-sm-label) + 2px); font-weight: bold; color: var(--c-main); white-space: nowrap;">
+                        Lv <span id="c-love-lv" style="color: var(--c-accent);">0</span> · <span id="c-love-title" style="color: var(--c-accent);">未知</span>
+                    </div>
+                    <div class="island-pill" style="font-size: var(--fs-sm-label); font-weight: bold; color: var(--c-main); gap: 2px; flex-wrap: wrap; justify-content: flex-end;">
+                        <span class="tooltip" style="white-space: nowrap;">境界：<span id="c-realm-val" style="color: var(--c-accent);">锁灵</span><span class="tooltiptext" id="c-realm-tooltip" style="width: 200px; text-align: left; white-space: pre-wrap; line-height: 1.5;"></span></span>
+                        <span style="opacity: 0.5;">|</span>
+                        <span class="tooltip" style="color: var(--c-main); white-space: nowrap;">圆融<span id="c-climax-val" style="color: var(--c-accent);">0</span>次<span class="tooltiptext">绝顶</span></span>
+                        <span style="opacity: 0.5;">|</span>
+                        <span class="tooltip"><i class="fas fa-star"></i> <span id="c-star-val" style="color: var(--c-accent);">0</span><span class="tooltiptext">乳星 (星衍境大高潮可生成❤~)</span></span>
+                        <span class="tooltip"><i class="fas fa-seedling"></i> <span id="c-preg-val" style="color: var(--c-accent);">无</span><span class="tooltiptext">孕灵 (蕴灵境种灵或明确种族❤~)</span></span>
+                        <span class="tooltip"><i class="fas fa-baby"></i> <span id="c-birth-val" style="color: var(--c-accent);">0</span><span class="tooltiptext">诞灵 (产下假婴可增加❤~)</span></span>
+                        <span class="tooltip"><i class="fas fa-wifi"></i> <span id="c-reso-val" style="color: var(--c-accent);">0</span><span class="tooltiptext">共鸣 (多女同时绝顶可增加❤~)</span></span>
+                        <span class="tooltip tooltip-left-expand"><i class="fas fa-bolt"></i> <span id="c-over-val" style="color: var(--c-accent);">0</span><span class="tooltiptext">过载 (灵融境灵体叠加肉体绝顶❤~)</span></span>
+                    </div>
+                </div>
+
+                <!-- 行3-5：实时内心 (高度缩小30%) -->
+                <div class="thought-bubble hide-on-min" style="min-height: 3em;">
+                    <i class="fas fa-quote-left" style="opacity:0.3; margin-right:3px; margin-top: 2px;"></i>
+                    <span id="c-thought-val" style="flex-grow: 1; display: -webkit-box; -webkit-line-clamp: 2; line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">...</span>
+                    <i class="fas fa-quote-right" style="opacity:0.3; margin-left:3px; align-self: flex-end; margin-bottom: 2px;"></i>
+                </div>
+
+                <!-- 行6-8：进度条集合 -->
+                <div class="island-pill" style="flex-direction: column; align-items: stretch; gap: 2px; padding: 4px 12px; width: 100%; margin-bottom: 0;">
+                    <!-- 爱意值 -->
+                    <div class="progress-row clickable tooltip tooltip-right" id="c-love-btn">
+                        <div class="progress-label-group">
+                            <span>爱意值：</span>
+                            <span class="text-gold-flash"><span id="c-love-val">0</span>/100</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill fill-magenta" id="c-love-bar" style="width: 0%;"></div></div>
+                        <span class="tooltiptext">≥100可升级 <span id="c-love-total">0</span>/2000</span>
+                    </div>
+
+                    <!-- 好感度 -->
+                    <div class="progress-row clickable tooltip tooltip-right" id="c-favor-btn">
+                        <div class="progress-label-group">
+                            <span>好感度：</span>
+                            <span class="text-gold-flash"><span id="c-favor-val">0</span>/100</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill fill-pink" id="c-favor-bar" style="width: 0%;"></div></div>
+                        <span class="tooltiptext">≥105可转化 <span id="c-favor-total">0</span>/2000</span>
+                    </div>
+
+                    <!-- 抗性 -->
+                    <div class="progress-row">
+                        <div class="progress-label-group">
+                            <span>抗性值：</span>
+                            <span class="text-gold-flash"><span id="c-res-val">100</span>/100</span>
+                        </div>
+                        <div class="progress-track"><div class="progress-fill fill-gold" id="c-res-bar" style="width: 100%;"></div></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 行9：部位进化仪表盘 (紧凑版) -->
+            <div class="evo-grid-compact" id="c-evo-container" style="position: relative; z-index: 50;">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 体味旋律 (气泡直接在背景上) -->
+        <div style="position: relative; z-index: 101; cursor: pointer; margin-top: 4px; margin-bottom: 4px;" class="hide-on-min" id="melody-wrapper-div" title="双击整行可固定展开/折叠">
+            <div class="melody-list" id="melody-summary" style="margin-bottom: var(--space-sm);">
+                <div class="melody-item island-pill melody-pill">
+                    <span class="editable-text" data-path="" id="c-melody-body" style="color: var(--c-accent); font-weight: normal; text-align: right;">无</span><span style="color: var(--c-accent); font-weight: normal; text-align: left;">香</span>
+                </div>
+                <div class="melody-item island-pill melody-pill">
+                    <span class="editable-text" data-path="" id="c-melody-fluid" style="color: var(--c-accent); font-weight: normal; text-align: right;">无</span><span style="color: var(--c-accent); font-weight: normal; text-align: left;">味</span>
+                </div>
+                <div class="melody-item island-pill melody-pill">
+                    <span style="color: var(--c-accent); font-weight: normal; text-align: right;">口感</span><span class="editable-text" data-path="" id="c-melody-taste" style="color: var(--c-accent); font-weight: normal; text-align: left;">无</span>
+                </div>
+                <div class="melody-item island-pill melody-pill" id="c-melody-temp-body-row">
+                    <span style="color: var(--c-accent); font-weight: normal; text-align: right;">点缀:</span><span class="editable-text" data-path="" id="c-melody-temp-body" style="color: var(--c-accent); font-weight: normal; text-align: left;">无</span><span style="color: var(--c-accent); font-weight: normal; text-align: left;">味儿</span>
+                </div>
+                <div class="melody-item island-pill melody-pill" id="c-melody-temp-taste-row">
+                    <span style="color: var(--c-accent); font-weight: normal; text-align: right;">点缀:</span><span class="editable-text" data-path="" id="c-melody-temp-taste" style="color: var(--c-accent); font-weight: normal; text-align: left;">无</span><span style="color: var(--c-accent); font-weight: normal; text-align: left;">口感</span>
+                </div>
+            </div>
+            
+            <!-- 体液与气味展开面板 -->
+            <div class="panel-content absolute-panel" id="c-fluids-container" style="display: none; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); border-top: none; margin-bottom: var(--space-sm); background: var(--c-panel-bg); border: 1px solid var(--c-panel-border); border-radius: var(--radius-md); padding: var(--space-md);">
+                <!-- 动态生成 -->
+            </div>
+        </div>
+
+        <!-- 装备与配饰栏 -->
+        <details class="panel-details hide-on-min" id="c-equip-details">
+            <summary class="panel-summary" style="justify-content: center; padding: var(--space-sm); background: transparent;">
+                <div class="fancy-divider" style="margin: 0;"><span>着装</span></div>
+            </summary>
+            <div class="panel-content" style="display: flex; flex-direction: column; gap: 3px; padding: 10px; border-top: none;">
+                <div id="c-equip-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px 10px;">
+                    <!-- 动态生成 -->
+                </div>
+                <details id="c-acc-details">
+                    <summary style="list-style: none; cursor: pointer; outline: none;">
+                        <div class="fancy-divider"><span>配饰</span></div>
+                    </summary>
+                    <div id="c-acc-container" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px 10px; margin-top: 3px;">
+                        <!-- 动态生成 -->
+                    </div>
+                </details>
+            </div>
+        </details>
+
+        <!-- 性癖档案 (2x3) -->
+        <details class="panel-details hide-on-min" id="c-fetish-details">
+            <summary class="panel-summary" style="justify-content: center; padding: var(--space-sm); background: transparent;">
+                <div class="fancy-divider" style="margin: 0;"><span>性癖档案</span></div>
+            </summary>
+            <div class="panel-content" id="c-fetish-container" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px 10px; padding: 10px; border-top: none;">
+                <!-- 动态生成 -->
+            </div>
+        </details>
+
+    </div>
+</div>
+
+<script>
+(async function() {
+    const $ = id => document.getElementById(id);
+    const $$ = sel => document.querySelectorAll(sel);
+    
+    // --- Base64 图片库 ---
+    // 请在此处替换为您转换好的Base64字符串，或使用网络图片链接
+    const CharImages = {
+        '苏瑶': [
+            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏瑶/苏瑶咬唇.jpg', // 占位图1
+            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏瑶/吐舌.jpg', // 占位图2
+        ],
+        '苏双双': [
+            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/苏双双/绿丝绸苏双双.jpg'
+        ],
+        '叶婉秋': [
+            'https://cdn.jsdelivr.net/gh/zzdzzdxx/ST-@main/分享图床/叶婉秋/叶婉秋红色丝衣.jpg'
+        ]
+    };
+    
+    // 敏感度阶梯定义
+    const SENSE_LEVELS = ['青涩', '觉醒', '渴求', '失控', '享乐', '纵情', '畅爽', '绝巅', '爽泄', '登仙', '纵欲', '欢愉'];
+    
+    // 状态管理
+    const AppState = {
+        activeChar: '苏瑶',
+        mvuData: null,
+        isReady: false,
+        theme: 'light'
+    };
+
+    // --- 工具函数 ---
+    const getLoveTitle = (lv) => {
+        if (lv < 1) return '友善';
+        if (lv < 10) return '暗恋';
+        if (lv < 20) return '初恋';
+        if (lv < 30) return '热恋';
+        if (lv < 40) return '眷恋';
+        if (lv < 50) return '依恋';
+        if (lv < 60) return '深爱';
+        if (lv < 70) return '病娇';
+        if (lv < 80) return '生死相依';
+        if (lv < 90) return '灵魂伴侣';
+        if (lv < 100) return '永恒契约';
+        if (lv < 110) return '终极归宿';
+        return '真爱化身';
+    };
+    
+    const bindEditableTexts = (container) => {
+        container.querySelectorAll('.editable-text').forEach(el => {
+            if(el.dataset.bound) return;
+            el.dataset.bound = "true";
+            el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+            el.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if(this.querySelector('input')) return;
+                const currentVal = this.textContent;
+                const path = this.getAttribute('data-path');
+                const inputVal = (currentVal === '\xa0' || currentVal.trim() === '') ? '' : currentVal;
+                this.innerHTML = `<input type="text" class="edit-input" value="${inputVal}">`;
+                const input = this.querySelector('input');
+                input.focus();
+                
+                input.addEventListener('click', ev => ev.stopPropagation());
+                input.addEventListener('dblclick', ev => ev.stopPropagation());
+                
+                const save = () => {
+                    const newVal = input.value.trim() || '无';
+                    this.innerHTML = formatEmptyVal(newVal);
+                    const oldVal = (currentVal === '\xa0' || currentVal.trim() === '') ? '无' : currentVal;
+                    if(newVal !== oldVal) {
+                        updateMvu(path, newVal, "已更新");
+                    }
+                };
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') input.blur(); });
+            });
+        });
+    };
+    // 格式化空值
+    const formatEmptyVal = (val) => {
+        if (!val || val === '无' || val === '未觉醒' || val === '未知') {
+            return `<span class="text-neon-red">&nbsp;</span>`;
+        }
+        return val;
+    };
+
+    // 爱意喷泉特效
+    const createHeartFountain = (element) => {
+        const fountain = document.createElement('div');
+        fountain.className = 'heart-fountain';
+        if (window.getComputedStyle(element).position === 'static') {
+            element.style.position = 'relative';
+        }
+        element.appendChild(fountain);
+
+        const duration = 6000;
+        const interval = 100;
+        let elapsed = 0;
+
+        const timer = setInterval(() => {
+            if (elapsed >= duration) {
+                clearInterval(timer);
+                setTimeout(() => fountain.remove(), 2000);
+                return;
+            }
+            const count = Math.floor(Math.random() * 3) + 2;
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('i');
+                particle.className = 'fas fa-heart heart-particle';
+                const angle = (Math.random() * 60 - 30) * (Math.PI / 180);
+                const velocity = Math.random() * 60 + 40;
+                const tx = Math.sin(angle) * velocity + 'px';
+                const ty = -Math.cos(angle) * velocity - (Math.random() * 30) + 'px';
+                const rot = (Math.random() * 360) + 'deg';
+                
+                particle.style.setProperty('--tx', tx);
+                particle.style.setProperty('--ty', ty);
+                particle.style.setProperty('--rot', rot);
+                particle.style.fontSize = (Math.random() * 10 + 10) + 'px';
+                if (Math.random() > 0.5) particle.style.color = '#ff4d6d';
+                
+                fountain.appendChild(particle);
+                particle.addEventListener('animationend', () => particle.remove());
+            }
+            elapsed += interval;
+        }, interval);
+    };
+
+    // 飘字特效
+    const showFloatingNumber = (element, text, type = 'pos') => {
+        const floater = document.createElement('span');
+        floater.textContent = text;
+        floater.className = `floating-number float-${type}`;
+        const offsetX = (Math.random() - 0.5) * 20;
+        floater.style.left = `calc(50% + ${offsetX}px)`;
+        floater.style.top = '0';
+        if (window.getComputedStyle(element).position === 'static') {
+            element.style.position = 'relative';
+        }
+        element.appendChild(floater);
+        floater.addEventListener('animationend', () => floater.remove());
+    };
+
+    const showToast = (msg, type='info') => {
+        if(typeof triggerSlash === 'function') {
+            const safeMsg = typeof msg === 'string' ? msg.replace(/(\\+)?([|{}])/g, (m, s, c) => (s || '') + (s || '') + '\\' + c) : msg;
+            triggerSlash(`/echo severity=${type} ${safeMsg}`);
+        } else {
+            console.log(`[${type}] ${msg}`);
+        }
+    };
+
+    const createParticles = () => {
+        const container = $('particles-container');
+        if(!container) return;
+        container.innerHTML = '';
+        for(let i=0; i<15; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            const size = Math.random() * 6 + 2;
+            p.style.width = `${size}px`;
+            p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.animationDuration = `${Math.random() * 3 + 2}s`;
+            p.style.animationDelay = `${Math.random() * 2}s`;
+            container.appendChild(p);
+        }
+    };
+
+    // --- 数据交互逻辑 ---
+    const fetchMvuData = () => {
+        if (typeof getAllVariables !== 'function' || typeof _ === 'undefined') return false;
+        AppState.mvuData = getAllVariables();
+        return !!AppState.mvuData;
+    };
+
+    const updateMvu = async (path, newValue, successMsg) => {
+        if (typeof Mvu === 'undefined' || typeof getCurrentMessageId !== 'function') {
+            showToast("MVU环境未就绪", "error");
+            return false;
+        }
+        try {
+            const msgId = getCurrentMessageId();
+            const data = Mvu.getMvuData({ type: 'message', message_id: msgId });
+            if (!data) return false;
+            
+            _.set(data, path, newValue);
+            await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });
+            
+            if(successMsg) showToast(successMsg, "success");
+            fetchMvuData();
+            renderUI();
+            return true;
+        } catch (e) {
+            console.error(e);
+            showToast("数据更新失败", "error");
+            return false;
+        }
+    };
+
+    // --- 渲染逻辑 ---
+    
+    // 渲染图片区
+    const renderImage = (charData) => {
+        const imgEl = $('c-image');
+        const images = CharImages[AppState.activeChar] || [];
+        if (images.length === 0) {
+            imgEl.src = '';
+            return;
+        }
+        // 读取MVU中的图片索引，若无则默认为0
+        let imgIdx = _.get(charData, '装备与心理.当前图片索引', 0);
+        if (imgIdx >= images.length) imgIdx = 0;
+        imgEl.src = images[imgIdx];
+    };
+
+    const renderGlobal = () => {
+        const d = AppState.mvuData;
+        const t = _.get(d, 'stat_data.全局.时间', {});
+        
+        const year  = t.年  ?? '--';
+        const month = t.月  ? String(t.月).padStart(2, '0') : '--';
+        const day   = t.日  ? String(t.日).padStart(2, '0') : '--';
+        const hour  = t.时  ? String(t.时).padStart(2, '0') : '--';
+        const min   = t.分  ? String(t.分).padStart(2, '0') : '--';
+        const week  = t.星期 ?? '';
+
+        $('g-datetime').textContent = `${year}年${month}月${day}日 ${hour}:${min} ${week}`;
+        $('g-loc').textContent = _.get(d, 'stat_data.全局.地点', '未知');
+        $('g-cash').textContent = _.get(d, 'stat_data.全局.资源.现金', 0);
+        $('g-score').textContent = _.get(d, 'stat_data.全局.资源.积分', 0);
+    };
+
+    const renderCore = (charData) => {
+        const love = charData.好感与爱意 || {};
+        const sense = charData.敏感度与境界 || {};
+        const multi = charData.多维行为检测 || {};
+        
+        const nickMap = { '苏瑶': '瑶瑶', '苏双双': '双双', '叶婉秋': '婉秋' };
+        $('c-nickname').textContent = nickMap[AppState.activeChar] || AppState.activeChar;
+        
+        // 强制前端计算称号，确保显示正确
+        const currentLoveLv = love.爱意等级 || 0;
+        $('c-love-title').textContent = getLoveTitle(currentLoveLv);
+        $('c-love-lv').textContent = currentLoveLv;
+        $('c-love-val').textContent = love.爱意值 || 0;
+        
+        // 计算体味旋律评价
+        const melody = charData.体味旋律 || {};
+        let rank = 'SS';
+        const hasTempBody = melody.临时体香 && melody.临时体香 !== '无' && melody.临时体香 !== '未觉醒' && melody.临时体香 !== '未开发' && melody.临时体香 !== '未知';
+        const hasTempTaste = melody.临时口感 && melody.临时口感 !== '无' && melody.临时口感 !== '未觉醒' && melody.临时口感 !== '未开发' && melody.临时口感 !== '未知';
+        if (hasTempTaste) {
+            rank = 'SSS+';
+        } else if (hasTempBody) {
+            rank = 'SSS';
+        }
+        const rankEl = $('c-melody-rank');
+        if (rankEl) {
+            rankEl.textContent = rank;
+            // 清理旧特效
+            rankEl.classList.remove('rank-sss', 'rank-sss-plus');
+            // 应用新特效
+            if (rank === 'SSS') {
+                rankEl.classList.add('rank-sss');
+            } else if (rank === 'SSS+') {
+                rankEl.classList.add('rank-sss-plus');
+            }
+        }
+        
+        // 进度条逻辑：基于累计值计算，满值为2000
+        const totalLove = love.累计爱意值 || love.爱意值 || 0;
+        const lovePct = Math.min(100, (totalLove / 2000) * 100);
+        $('c-love-bar').style.width = `${lovePct}%`;
+        const loveTotalEl = $('c-love-total');
+        if (loveTotalEl) loveTotalEl.textContent = totalLove;
+        
+        $('c-favor-val').textContent = love.好感度 || 0;
+        
+        // 进度条逻辑：基于累计值计算，满值为2000
+        const totalFavor = love.累计好感度 || love.好感度 || 0;
+        const favorPct = Math.min(100, (totalFavor / 2000) * 100);
+        $('c-favor-bar').style.width = `${favorPct}%`;
+        const favorTotalEl = $('c-favor-total');
+        if (favorTotalEl) favorTotalEl.textContent = totalFavor;
+        
+        $('c-sense-val').textContent = sense.当前敏感度等级 || '青涩';
+        $('c-res-val').textContent = sense._生理抗性 || 100;
+        $('c-res-bar').style.width = `${sense._生理抗性 || 100}%`;
+        $('c-climax-val').textContent = sense.圆融计数 || 0;
+        
+        const currentRealm = sense.红鸾境界 || '锁灵';
+        $('c-realm-val').textContent = currentRealm;
+        $('c-star-val').textContent = multi.乳星 || 0;
+        $('c-preg-val').textContent = multi.孕灵状态 || '无';
+        $('c-birth-val').textContent = multi.诞灵次数 || 0;
+        $('c-reso-val').textContent = multi.共鸣次数 || 0;
+        $('c-over-val').textContent = multi.感官过载次数 || 0;
+        
+        // 动态计算境界突破提示
+        const globalScore = _.get(AppState.mvuData, 'stat_data.全局.资源.积分', 0);
+        const curClimax = sense.圆融计数 || 0;
+        const curStar = multi.乳星 || 0;
+        const curBirth = multi.诞灵次数 || 0;
+        const curReso = multi.共鸣次数 || 0;
+        const curOver = multi.感官过载次数 || 0;
+        const curLoveLv = love.爱意等级 || 0;
+        
+        let tooltipText = '';
+        let targetRealm = currentRealm;
+        if (curClimax >= 100 && curStar >= 200 && curOver >= 20 && curLoveLv >= 80) targetRealm = '众妙'; 
+        else if (curClimax >= 50 && curStar >= 100 && curReso >= 10) targetRealm = '灵融';
+        else if (curClimax >= 20 && curStar >= 20 && curBirth >= 1 && curLoveLv >= 20) targetRealm = '蕴灵';
+        else if (curClimax >= 5 && curStar >= 1) targetRealm = '星衍';
+        else if (curClimax >= 2) targetRealm = '玉润';
+
+        const realms = ['锁灵', '玉润', '星衍', '蕴灵', '灵融', '众妙'];
+        const canBreakthrough = realms.indexOf(targetRealm) > realms.indexOf(currentRealm);
+
+        if (currentRealm === '锁灵') {
+            tooltipText = `【突破至 玉润】\n圆融计数: ${curClimax}/5\n积分: ${globalScore}/221`;
+        } else if (currentRealm === '玉润') {
+            tooltipText = `【突破至 星衍】\n圆融计数: ${curClimax}/10\n积分: ${globalScore}/401`;
+        } else if (currentRealm === '星衍') {
+            tooltipText = `【突破至 蕴灵】\n圆融计数: ${curClimax}/40\n乳星: ${curStar}/30\n诞灵次数: ${curBirth}/1\n爱意等级: ${curLoveLv}/30`;
+        } else if (currentRealm === '蕴灵') {
+            tooltipText = `【突破至 灵融】\n圆融计数: ${curClimax}/60\n共鸣次数: ${curReso}/10`;
+        } else if (currentRealm === '灵融') {
+            tooltipText = `【突破至 众妙】\n圆融计数: ${curClimax}/80\n感官过载: ${curOver}/1\n爱意等级: ${curLoveLv}/80`;
+        } else if (currentRealm === '众妙') {
+            tooltipText = `已达最高境界【众妙】\n万法自然，灵枢圆融。`;
+        }
+        
+        const realmValEl = $('c-realm-val');
+        if (canBreakthrough) {
+            realmValEl.classList.add('text-gold-flash');
+            realmValEl.style.cursor = 'pointer';
+            realmValEl.onclick = () => {
+                if(typeof triggerSlash === 'function') {
+                    triggerSlash(`/setinput 协助她突破到${targetRealm}境界`);
+                }
+            };
+            tooltipText = `【可突破至 ${targetRealm}】\n点击协助突破！\n\n` + tooltipText;
+        } else {
+            realmValEl.classList.remove('text-gold-flash');
+            realmValEl.style.cursor = 'default';
+            realmValEl.onclick = null;
+        }
+
+        const realmTooltip = $('c-realm-tooltip');
+        if (realmTooltip) realmTooltip.textContent = tooltipText;
+        
+        $('c-thought-val').textContent = charData.装备与心理?.实时内心 || '...';
+        
+        // 动态背景色偏移
+        const levelIdx = SENSE_LEVELS.indexOf(sense.当前敏感度等级 || '青涩');
+        const ratio = Math.max(0, Math.min(1, levelIdx / (SENSE_LEVELS.length - 1)));
+
+        const wrapper = $('monitor-app');
+        if (AppState.theme === 'dark') {
+            const r1 = 26 + (34 * ratio), g1 = 5 + (5 * ratio), b1 = 10 + (10 * ratio);
+            const r2 = 40 + (40 * ratio), g2 = 10 + (10 * ratio), b2 = 20 + (10 * ratio);
+            wrapper.style.setProperty('--dynamic-bg-1', `rgba(${r1},${g1},${b1},0.9)`);
+            wrapper.style.setProperty('--dynamic-bg-2', `rgba(${r2},${g2},${b2},0.8)`);
+        } else {
+            const r1 = 255, g1 = 240 - (40 * ratio), b1 = 245 - (35 * ratio);
+            const r2 = 248 + (7 * ratio), g2 = 195 - (95 * ratio), b2 = 205 - (105 * ratio);
+            wrapper.style.setProperty('--dynamic-bg-1', `rgba(${r1},${g1},${b1},0.85)`);
+            wrapper.style.setProperty('--dynamic-bg-2', `rgba(${r2},${g2},${b2},0.6)`);
+        }
+    };
+
+    const renderFluids = (charData) => {
+        const fluids = charData.体液状态 || {};
+        const melody = charData.体味旋律 || {};
+        const container = $('c-fluids-container');
+        
+        const bodyEl = $('c-melody-body');
+        const fluidEl = $('c-melody-fluid');
+        const tasteEl = $('c-melody-taste');
+        const tempBodyEl = $('c-melody-temp-body');
+        const tempTasteEl = $('c-melody-temp-taste');
+        
+        if(bodyEl) {
+            bodyEl.innerHTML = formatEmptyVal(melody.体香);
+            bodyEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.体香`);
+        }
+        if(fluidEl) {
+            fluidEl.innerHTML = formatEmptyVal(melody.体液香);
+            fluidEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.体液香`);
+        }
+        if(tasteEl) {
+            tasteEl.innerHTML = formatEmptyVal(melody.口感);
+            tasteEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.口感`);
+        }
+        
+        // 临时体香和临时口感处理
+        // 判断当前面板是否处于双击嵌入展开状态
+        const isEmbeddedOpen = container.style.display === 'grid' && !container.classList.contains('absolute-panel');
+
+        if(tempBodyEl) {
+            const tempBodyVal = melody.临时体香;
+            const isEmpty = !tempBodyVal || tempBodyVal === '无' || tempBodyVal === '未觉醒' || tempBodyVal === '未开发' || tempBodyVal === '未知';
+            
+            if (isEmpty && !isEmbeddedOpen) {
+                $('c-melody-temp-body-row').style.display = 'none';
+            } else {
+                $('c-melody-temp-body-row').style.display = 'flex';
+                tempBodyEl.innerHTML = formatEmptyVal(tempBodyVal);
+            }
+            tempBodyEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.临时体香`);
+        }
+        
+        if(tempTasteEl) {
+            const tempTasteVal = melody.临时口感;
+            const isEmpty = !tempTasteVal || tempTasteVal === '无' || tempTasteVal === '未觉醒' || tempTasteVal === '未开发' || tempTasteVal === '未知';
+            
+            if (isEmpty && !isEmbeddedOpen) {
+                $('c-melody-temp-taste-row').style.display = 'none';
+            } else {
+                $('c-melody-temp-taste-row').style.display = 'flex';
+                tempTasteEl.innerHTML = formatEmptyVal(tempTasteVal);
+            }
+            tempTasteEl.setAttribute('data-path', `stat_data.角色.${AppState.activeChar}.体味旋律.临时口感`);
+        }
+        
+        const prefixMap = {
+            '苏瑶': { 津液: '薄荷', 仙元: '薄荷', 灵泉: '薄荷茶芬', 兰露: '樱桃' },
+            '苏双双': { 津液: '玉兰', 仙元: '荔枝', 灵泉: '普洱茶芬', 兰露: '玉兰' },
+            '叶婉秋': { 津液: '玫瑰', 仙元: '玫瑰', 灵泉: '龙井茶芬', 兰露: '红酒' }
+        };
+        const pfx = prefixMap[AppState.activeChar] || { 津液: '', 仙元: '', 灵泉: '', 兰露: '' };
+        
+        let html = '';
+        const addTag = (lbl, val) => {
+            html += `<div class="data-tag" style="flex-direction: row; justify-content: space-between; align-items: center; padding: 4px 8px;"><span class="lbl" style="margin-bottom: 0;">${lbl}</span><span class="val val-pink-bold">${formatEmptyVal(val)}</span></div>`;
+        };
+        
+        addTag(`${pfx.津液}津液`, fluids.津液);
+        addTag('腋下清汗', fluids.腋下清汗);
+        addTag('足汗油膏', fluids.足汗油膏);
+        addTag(`醇湿仙元`, fluids.醇湿仙元);
+        addTag(`骚香灵泉`, fluids.骚香灵泉);
+        addTag(`兰露肠液`, fluids.兰露肠液);
+        
+        container.innerHTML = html;
+    };
+
+    const renderEvo = (charData) => {
+        const evo = charData.部位进化 || {};
+        const container = $('c-evo-container');
+        let html = '';
+        
+        const getDisplayLevel = (val) => {
+            if (val >= 100) return 'MAX';
+            if (val >= 81) return 'Lv5';
+            if (val >= 41) return 'Lv4';
+            if (val >= 16) return 'Lv3';
+            if (val >= 11) return 'Lv2';
+            if (val >= 6) return 'Lv1';
+            return 'Lv0';
+        };
+        
+        const parts = ['香舌', '奶子', '小穴', '菊蕊'];
+        parts.forEach(p => {
+            const d = evo[p] || { 数值:0, _Lv:0, 状态:'未开发', 强化部位1:'无', 强化部位2:'无' };
+            const isMax = d.数值 >= 100;
+            const pct = isMax ? '100%' : (d.数值 % 100) + '%';
+            const maxClass = isMax ? 'is-max' : '';
+            const dropId = `drop-${p}`;
+            const displayLevel = getDisplayLevel(d.数值);
+            const levelStyle = isMax ? 'font-size: var(--fs-xs); color: var(--c-accent); text-shadow: 0 0 5px var(--c-accent);' : 'font-size: var(--fs-xs);';
+            
+            let displayName = p;
+            if (p === '奶子') {
+                const isNaiZi = localStorage.getItem('mvu_monitor_name_奶子') === 'true';
+                displayName = isNaiZi ? '奶子' : '双峦';
+            } else if (p === '小穴') {
+                const isXiaoXue = localStorage.getItem('mvu_monitor_name_小穴') === 'true';
+                displayName = isXiaoXue ? '小穴' : '仙脉';
+            }
+            
+            const formatEnhanceVal = (val) => {
+                if (!val || val === '无' || val === '未觉醒') return `<span class="text-neon-red">&nbsp;</span>`;
+                return val;
+            };
+            
+            html += `
+                <div class="evo-container-item" id="evo-item-${p}">
+                    <div class="evo-flipper">
+                        <!-- 正面 -->
+                        <div class="evo-front">
+                            <div class="evo-top-row">
+                                <div class="ring-wrapper ${maxClass}" style="--pct: ${pct}; cursor: pointer;" onclick="document.getElementById('evo-item-${p}').classList.toggle('flipped'); event.stopPropagation();" title="点击翻转查看强化">
+                                    <div class="ring-inner" style="${levelStyle}">${displayLevel}</div>
+                                </div>
+                                <div class="evo-name-row"><span class="evo-part-name" data-part="${p}" style="cursor:pointer;" title="双击切换名称">${displayName}</span> <span class="text-bright-pink">${d.数值}</span></div>
+                            </div>
+                            <div class="fancy-divider"><span>·</span></div>
+                            <div class="evo-desc editable-text" data-path="stat_data.角色.${AppState.activeChar}.部位进化.${p}.状态" title="${d.状态}">${formatEmptyVal(d.状态)}</div>
+                        </div>
+                        <!-- 背面 -->
+                        <div class="evo-back" onclick="document.getElementById('evo-item-${p}').classList.toggle('flipped'); event.stopPropagation();" title="点击翻转回正面" style="cursor: pointer;">
+                            <div class="fancy-divider fancy-divider-gold" style="margin: 0 0 2px 0; font-size: var(--fs-xs);"><span>强化</span></div>
+                            <div class="evo-enhance-item item-bubble" style="justify-content: center;"><span class="editable-text text-gold-flash" data-path="stat_data.角色.${AppState.activeChar}.部位进化.${p}.强化部位1" style="min-height: 1.2em; display: inline-block; overflow: hidden; text-overflow: ellipsis; text-align: center;">${formatEnhanceVal(d.强化部位1)}</span></div>
+                            <div class="evo-enhance-item item-bubble" style="justify-content: center;"><span class="editable-text text-gold-flash" data-path="stat_data.角色.${AppState.activeChar}.部位进化.${p}.强化部位2" style="min-height: 1.2em; display: inline-block; overflow: hidden; text-overflow: ellipsis; text-align: center;">${formatEnhanceVal(d.强化部位2)}</span></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+        bindEditableTexts(container);
+        
+        // 绑定双击切换名称事件
+        container.querySelectorAll('.evo-part-name').forEach(el => {
+            el.addEventListener('dblclick', (e) => {
+                e.stopPropagation();
+                const part = e.currentTarget.getAttribute('data-part');
+                if (part === '奶子' || part === '小穴') {
+                    const key = `mvu_monitor_name_${part}`;
+                    const current = localStorage.getItem(key) === 'true';
+                    localStorage.setItem(key, !current);
+                    renderUI();
+                }
+            });
+        });
+    };
+
+    const renderEditableBlocks = (charData) => {
+        const eq = charData.装备与心理 || {};
+        
+        // 装备 (3x2)
+        const eqCont = $('c-equip-container');
+        let eqHtml = '';
+        ['上身', '下身', '内衣', '内裤', '美腿', '玉足'].forEach(k => {
+            const val = eq[k];
+            eqHtml += `<div class="data-tag item-bubble" style="flex-direction: row; justify-content: flex-start; align-items: center; gap: 4px;"><span class="lbl" style="margin-bottom: 0; min-width: 3em; text-align: left;">${k}</span><span class="val editable-text val-pink-bold" data-path="stat_data.角色.${AppState.activeChar}.装备与心理.${k}" style="min-height: 1.2em; text-align: left;">${formatEmptyVal(val)}</span></div>`;
+        });
+        eqCont.innerHTML = eqHtml;
+        
+        // 配饰 (2x4)
+        const accCont = $('c-acc-container');
+        let accHtml = '';
+        const rawAcc = eq.配饰 || [];
+        for(let i=0; i<8; i++) {
+            const val = rawAcc[i];
+            accHtml += `<div class="data-tag item-bubble" style="justify-content: center;"><span class="val editable-text val-pink-bold" data-path="stat_data.角色.${AppState.activeChar}.装备与心理.配饰[${i}]" style="min-height: 1.2em;">${formatEmptyVal(val)}</span></div>`;
+        }
+        accCont.innerHTML = accHtml;
+        
+        // 性癖 (2x3)
+        const fetCont = $('c-fetish-container');
+        let fetHtml = '';
+        const rawFet = eq.性癖档案 || [];
+        for(let i=0; i<6; i++) {
+            const val = rawFet[i];
+            fetHtml += `<div class="data-tag item-bubble" style="justify-content: center;"><span class="val editable-text val-pink-bold" data-path="stat_data.角色.${AppState.activeChar}.装备与心理.性癖档案[${i}]" style="min-height: 1.2em;">${formatEmptyVal(val)}</span></div>`;
+        }
+        fetCont.innerHTML = fetHtml;
+        
+        // 绑定双击编辑事件
+        $$('.editable-text').forEach(el => {
+            el.addEventListener('click', e => { e.preventDefault(); e.stopPropagation(); });
+            el.addEventListener('dblclick', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if(this.querySelector('input')) return;
+                const currentVal = this.textContent;
+                const path = this.getAttribute('data-path');
+                const inputVal = (currentVal === '\xa0' || currentVal.trim() === '') ? '' : currentVal;
+                this.innerHTML = `<input type="text" class="edit-input" value="${inputVal}">`;
+                const input = this.querySelector('input');
+                input.focus();
+                
+                // 阻止输入框内部点击冒泡
+                input.addEventListener('click', ev => ev.stopPropagation());
+                input.addEventListener('dblclick', ev => ev.stopPropagation());
+                
+                const save = () => {
+                    const newVal = input.value.trim() || '无';
+                    this.innerHTML = formatEmptyVal(newVal);
+                    const oldVal = (currentVal === '\xa0' || currentVal.trim() === '') ? '无' : currentVal;
+                    if(newVal !== oldVal) {
+                        updateMvu(path, newVal, "已更新");
+                    }
+                };
+                input.addEventListener('blur', save);
+                input.addEventListener('keydown', (ev) => { if(ev.key === 'Enter') input.blur(); });
+            });
+        });
+    };
+
+    const renderUI = () => {
+        if (!AppState.isReady || !AppState.mvuData) return;
+        
+        renderGlobal();
+        
+        const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});
+        renderImage(charData);
+        renderCore(charData);
+        renderEvo(charData);
+        renderFluids(charData);
+        renderEditableBlocks(charData);
+    };
+
+    // --- 交互绑定 ---
+    const bindEvents = () => {
+        // 全局点击关闭下拉菜单、Tooltip 和悬浮面板
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.evo-container-item')) {
+                const flippedItems = $('c-evo-container')?.querySelectorAll('.evo-container-item.flipped');
+                if (flippedItems) {
+                    flippedItems.forEach(el => el.classList.remove('flipped'));
+                }
+            }
+            if (!e.target.closest('.tooltip')) {
+                $$('.tooltip.active-click').forEach(el => el.classList.remove('active-click'));
+            }
+            // 点击空白处关闭悬浮的体液面板
+            if (!e.target.closest('#melody-wrapper-div') && !e.target.closest('#c-fluids-container')) {
+                const fluidsContainer = $('c-fluids-container');
+                if (fluidsContainer && fluidsContainer.classList.contains('absolute-panel')) {
+                    fluidsContainer.style.display = 'none';
+                }
+            }
+        });
+
+        // Tooltip 单击开关 (常驻/取消)
+        $$('.tooltip').forEach(el => {
+            el.addEventListener('click', (e) => {
+                // 如果点击的是内部的可编辑文本、输入框或进度条本身，不触发 tooltip 切换
+                if (e.target.closest('.editable-text') || e.target.tagName === 'INPUT' || e.target.closest('.progress-track')) return;
+                
+                const isActive = el.classList.contains('active-click');
+                // 关闭其他
+                $$('.tooltip.active-click').forEach(t => {
+                    if (t !== el) t.classList.remove('active-click');
+                });
+                if (!isActive) {
+                    el.classList.add('active-click');
+                } else {
+                    el.classList.remove('active-click');
+                }
+            });
+        });
+
+        // 图片点击切图
+        $('c-image-zone').addEventListener('click', () => {
+            const images = CharImages[AppState.activeChar] || [];
+            if (images.length <= 1) return;
+            
+            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});
+            let imgIdx = _.get(charData, '装备与心理.当前图片索引', 0);
+            imgIdx = (imgIdx + 1) >= images.length ? 0 : imgIdx + 1;
+            
+            const path = `stat_data.角色.${AppState.activeChar}.装备与心理.当前图片索引`;
+            updateMvu(path, imgIdx); // 更新MVU并触发重绘
+        });
+
+        // 主题切换
+        $('toggle-theme').addEventListener('click', () => {
+            const wrapper = $('monitor-app');
+            const icon = $('toggle-theme').querySelector('i');
+            if (AppState.theme === 'light') {
+                AppState.theme = 'dark';
+                wrapper.classList.add('theme-dark');
+                icon.className = 'fas fa-sun';
+            } else {
+                AppState.theme = 'light';
+                wrapper.classList.remove('theme-dark');
+                icon.className = 'fas fa-moon';
+            }
+            localStorage.setItem('mvu_monitor_theme', AppState.theme);
+            renderUI();
+        });
+
+        // 最小化切换 (按钮点击)
+        $('toggle-min').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const app = $('monitor-app');
+            app.classList.toggle('minimized');
+            const isMin = app.classList.contains('minimized');
+            localStorage.setItem('mvu_monitor_minimized', isMin);
+            const icon = $('toggle-min').querySelector('i');
+            icon.className = isMin ? 'fas fa-expand-arrows-alt' : 'fas fa-compress-alt';
+        });
+
+        // 最小化状态下点击整行展开
+        document.querySelector('.global-bar').addEventListener('click', (e) => {
+            const app = $('monitor-app');
+            if (app.classList.contains('minimized')) {
+                // 如果点击的是主题切换按钮，不在这里处理展开，让主题切换自己处理
+                if (e.target.closest('#toggle-theme')) return;
+                
+                app.classList.remove('minimized');
+                localStorage.setItem('mvu_monitor_minimized', false);
+                const icon = $('toggle-min').querySelector('i');
+                if(icon) icon.className = 'fas fa-compress-alt';
+            }
+        });
+        
+        // 装备栏折叠状态持久化
+        const equipDetails = $('c-equip-details');
+        if (equipDetails) {
+            equipDetails.addEventListener('toggle', () => {
+                localStorage.setItem('mvu_monitor_equip_open', equipDetails.open);
+            });
+        }
+        
+        // 配饰栏折叠状态持久化
+        const accDetails = $('c-acc-details');
+        if (accDetails) {
+            accDetails.addEventListener('toggle', () => {
+                localStorage.setItem('mvu_monitor_acc_open', accDetails.open);
+            });
+        }
+        
+        // 性癖档案折叠状态持久化
+        const fetishDetails = $('c-fetish-details');
+        if (fetishDetails) {
+            fetishDetails.addEventListener('toggle', () => {
+                localStorage.setItem('mvu_monitor_fetish_open', fetishDetails.open);
+            });
+        }
+
+        // Tab 切换
+        $$('.tab-btn[data-char]').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                $$('.tab-btn').forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                AppState.activeChar = e.currentTarget.getAttribute('data-char');
+                renderUI();
+            });
+        });
+
+        // 爱意值升级
+        $('c-love-btn').addEventListener('click', async function() {
+            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});
+            const loveVal = _.get(charData, '好感与爱意.爱意值', 0);
+            if (loveVal >= 100) {
+                const pathBase = `stat_data.角色.${AppState.activeChar}.好感与爱意`;
+                const currentLv = _.get(charData, '好感与爱意.爱意等级', 0);
+                const nextLv = currentLv + 1;
+                
+                showFloatingNumber(this, '-100', 'neg');
+                const lvNode = $('c-love-lv').parentNode;
+                showFloatingNumber(lvNode, '+1 Lv', 'pos');
+                createHeartFountain(lvNode);
+
+                // 乐观更新本地数据
+                _.set(AppState.mvuData, `${pathBase}.爱意值`, loveVal - 100);
+                _.set(AppState.mvuData, `${pathBase}.爱意等级`, nextLv);
+                _.set(AppState.mvuData, `${pathBase}._爱意阶段称号`, getLoveTitle(nextLv));
+                renderUI();
+
+                if (typeof Mvu !== 'undefined' && typeof getCurrentMessageId === 'function') {
+                    const msgId = getCurrentMessageId();
+                    const data = Mvu.getMvuData({ type: 'message', message_id: msgId });
+                    if(data) {
+                        _.set(data, `${pathBase}.爱意值`, loveVal - 100);
+                        _.set(data, `${pathBase}.爱意等级`, nextLv);
+                        _.set(data, `${pathBase}._爱意阶段称号`, getLoveTitle(nextLv));
+                        await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });
+                        showToast(`升级成功！爱意等级达到 Lv${nextLv}`, "success");
+                        fetchMvuData();
+                        renderUI(); // 确保写回后再次刷新UI
+                    }
+                }
+            } else {
+                showToast("爱意值不足100，无法升级", "warning");
+            }
+        });
+
+        // 好感度转化
+        $('c-favor-btn').addEventListener('click', async function() {
+            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});
+            const favor = _.get(charData, '好感与爱意.好感度', 0);
+            if (favor >= 105) {
+                const addLove = Math.floor(Math.random() * 7) + 4; // 4~10
+                const pathBase = `stat_data.角色.${AppState.activeChar}.好感与爱意`;
+                const currentLove = _.get(charData, '好感与爱意.爱意值', 0);
+                const totalLove = _.get(charData, '好感与爱意.累计爱意值', currentLove);
+                
+                showFloatingNumber(this, '-5', 'neg');
+                showFloatingNumber($('c-love-btn'), `+${addLove}`, 'pos');
+
+                // 乐观更新本地数据
+                _.set(AppState.mvuData, `${pathBase}.好感度`, favor - 5);
+                _.set(AppState.mvuData, `${pathBase}.爱意值`, currentLove + addLove);
+                _.set(AppState.mvuData, `${pathBase}.累计爱意值`, totalLove + addLove);
+                renderUI();
+
+                if (typeof Mvu !== 'undefined' && typeof getCurrentMessageId === 'function') {
+                    const msgId = getCurrentMessageId();
+                    const data = Mvu.getMvuData({ type: 'message', message_id: msgId });
+                    if(data) {
+                        _.set(data, `${pathBase}.好感度`, favor - 5);
+                        _.set(data, `${pathBase}.爱意值`, currentLove + addLove);
+                        _.set(data, `${pathBase}.累计爱意值`, totalLove + addLove);
+                        await Mvu.replaceMvuData(data, { type: 'message', message_id: msgId });
+                        showToast(`转化成功！爱意值 +${addLove}`, "success");
+                        fetchMvuData();
+                    }
+                }
+            } else {
+                showToast("好感度不足105，无法转化", "warning");
+            }
+        });
+
+        // 体味旋律面板交互 (悬停悬浮，双击嵌入，双击关闭)
+        const melodySummary = $('melody-summary');
+        const fluidsContainer = $('c-fluids-container');
+        const melodyWrapper = $('melody-wrapper-div');
+
+        // 阻止点击面板内部冒泡到 document 导致关闭
+        fluidsContainer.addEventListener('click', (e) => e.stopPropagation());
+
+        // 悬停展示：仅当鼠标进入小气泡范围内时触发展开
+        melodySummary.addEventListener('mouseenter', (e) => {
+            if (fluidsContainer.style.display !== 'grid' || fluidsContainer.classList.contains('absolute-panel')) {
+                fluidsContainer.style.display = 'grid';
+                fluidsContainer.classList.add('absolute-panel');
+            }
+        });
+
+        // 移开隐藏：当鼠标离开气泡区域时，如果未进入展开面板，则隐藏
+        melodySummary.addEventListener('mouseleave', (e) => {
+            if (fluidsContainer.classList.contains('absolute-panel')) {
+                if (!e.relatedTarget || !e.relatedTarget.closest('#c-fluids-container')) {
+                    fluidsContainer.style.display = 'none';
+                }
+            }
+        });
+        
+        // 移开隐藏：当鼠标离开展开面板时，如果未进入气泡区域，则隐藏
+        fluidsContainer.addEventListener('mouseleave', (e) => {
+            if (fluidsContainer.classList.contains('absolute-panel')) {
+                if (!e.relatedTarget || !e.relatedTarget.closest('#melody-summary')) {
+                    fluidsContainer.style.display = 'none';
+                }
+            }
+        });
+
+        // 双击嵌入/关闭 (绑定在外层，整行可双击)
+        melodyWrapper.addEventListener('dblclick', (e) => {
+            if (e.target.closest('.editable-text') || e.target.tagName === 'INPUT') return;
+            
+            if (fluidsContainer.style.display === 'grid' && !fluidsContainer.classList.contains('absolute-panel')) {
+                // 当前是嵌入展开状态，双击关闭
+                fluidsContainer.style.display = 'none';
+                localStorage.setItem('mvu_monitor_fluids_open', 'false');
+            } else {
+                // 当前是悬浮或关闭状态，双击转为嵌入展开
+                fluidsContainer.style.display = 'grid';
+                fluidsContainer.classList.remove('absolute-panel');
+                localStorage.setItem('mvu_monitor_fluids_open', 'true');
+            }
+            // 触发重绘以更新临时标签的显示状态
+            renderUI();
+        });
+
+        // 敏感度切换
+        $('c-sense-btn').addEventListener('click', () => {
+            const charData = _.get(AppState.mvuData, `stat_data.角色.${AppState.activeChar}`, {});
+            const current = _.get(charData, '敏感度与境界.当前敏感度等级', '青涩');
+            const maxUnlocked = _.get(charData, '敏感度与境界._已解锁最高敏感度', '青涩');
+            
+            const maxIdx = SENSE_LEVELS.indexOf(maxUnlocked);
+            let curIdx = SENSE_LEVELS.indexOf(current);
+            
+            if (maxIdx === -1 || curIdx === -1) return;
+            
+            curIdx = (curIdx + 1) > maxIdx ? 0 : curIdx + 1;
+            const nextLevel = SENSE_LEVELS[curIdx];
+            
+            updateMvu(`stat_data.角色.${AppState.activeChar}.敏感度与境界.当前敏感度等级`, nextLevel, `已切换至: ${nextLevel}`);
+        });
+    };
+
+    // --- 初始化 ---
+    const init = async () => {
+        if (typeof waitGlobalInitialized === 'function') {
+            await waitGlobalInitialized('Mvu');
+        }
+
+        const savedTheme = localStorage.getItem('mvu_monitor_theme');
+        if (savedTheme === 'dark') {
+            AppState.theme = 'dark';
+            $('monitor-app').classList.add('theme-dark');
+            const themeIcon = $('toggle-theme')?.querySelector('i');
+            if(themeIcon) themeIcon.className = 'fas fa-sun';
+        }
+        
+        // 读取最小化状态 (默认最小化)
+        const savedMin = localStorage.getItem('mvu_monitor_minimized');
+        const isMin = savedMin === null ? true : savedMin === 'true';
+        if (isMin) {
+            $('monitor-app').classList.add('minimized');
+            const minIcon = $('toggle-min')?.querySelector('i');
+            if(minIcon) minIcon.className = 'fas fa-expand-arrows-alt';
+        }
+        
+        // 读取装备栏折叠状态 (默认折叠)
+        const savedEquipOpen = localStorage.getItem('mvu_monitor_equip_open');
+        const equipDetails = $('c-equip-details');
+        if (equipDetails) {
+            if (savedEquipOpen === 'true') {
+                equipDetails.setAttribute('open', '');
+            } else {
+                equipDetails.removeAttribute('open');
+            }
+        }
+
+        // 读取配饰栏折叠状态 (默认折叠)
+        const savedAccOpen = localStorage.getItem('mvu_monitor_acc_open');
+        const accDetails = $('c-acc-details');
+        if (accDetails) {
+            if (savedAccOpen === 'true') {
+                accDetails.setAttribute('open', '');
+            } else {
+                accDetails.removeAttribute('open');
+            }
+        }
+
+        // 读取性癖档案折叠状态 (默认折叠)
+        const savedFetishOpen = localStorage.getItem('mvu_monitor_fetish_open');
+        const fetishDetails = $('c-fetish-details');
+        if (fetishDetails) {
+            if (savedFetishOpen === 'true') {
+                fetishDetails.setAttribute('open', '');
+            } else {
+                fetishDetails.removeAttribute('open');
+            }
+        }
+        
+        // 读取体液面板折叠状态 (默认折叠)
+        const savedFluidsOpen = localStorage.getItem('mvu_monitor_fluids_open');
+        const fluidsContainer = $('c-fluids-container');
+        if (fluidsContainer && savedFluidsOpen === 'true') {
+            fluidsContainer.style.display = 'grid';
+            fluidsContainer.classList.remove('absolute-panel');
+        }
+
+        if (fetchMvuData()) {
+            AppState.isReady = true;
+            createParticles();
+            bindEvents();
+            renderUI();
+            
+            if (typeof eventOn === 'function' && typeof Mvu !== 'undefined') {
+                eventOn(Mvu.events.VARIABLE_UPDATE_ENDED, () => {
+                    if(fetchMvuData()) renderUI();
+                });
+            }
+        } else {
+            $('monitor-app').innerHTML = '<div style="padding:20px;text-align:center;color:red;">MVU变量系统未就绪或未找到数据，请确保已正确配置并初始化变量。</div>';
+        }
+    };
+
+    setTimeout(init, 100);
+
+})();
+</script>
+</body>
+</html>
+```

@@ -1,17 +1,152 @@
-{
-  "type": "script",
-  "enabled": true,
-  "name": "末日堡垒_变量定义",
-  "id": "61e5a51b-dd1c-4831-b574-6e337b3c128c",
-  "content": "import { registerMvuSchema } from 'https://testingcf.jsdelivr.net/gh/StageDog/tavern_resource/dist/util/mvu_zod.js';\n\n// 定义爱意称号推导逻辑\nconst getLoveTitle = (lv) => {\n  if (lv < 1) return '友善';\n  if (lv < 10) return '暗恋';\n  if (lv < 20) return '初恋';\n  if (lv < 30) return '热恋';\n  if (lv < 40) return '眷恋';\n  if (lv < 50) return '依恋';\n  if (lv < 60) return '深爱';\n  if (lv < 70) return '病娇';\n  if (lv < 80) return '生死相依';\n  if (lv < 90) return '灵魂伴侣';\n  if (lv < 100) return '永恒契约';\n  if (lv < 110) return '终极归宿';\n  return '真爱化身';\n};\n\n// 定义生理抗性推导逻辑 (线性递减)\nconst getResistance = (count) => {\n  return Math.max(0, 100 - count);\n};\n\n// 定义敏感度级别推导逻辑 (基于生理抗性)\nconst getSensitivityLevel = (resistance) => {\n  if (resistance >= 97) return '青涩';\n  if (resistance >= 91) return '觉醒';\n  if (resistance >= 85) return '渴求';\n  if (resistance >= 80) return '失控';\n  if (resistance >= 74) return '享乐';\n  if (resistance >= 65) return '纵情';\n  if (resistance >= 60) return '畅爽';\n  if (resistance >= 50) return '绝巅';\n  if (resistance >= 35) return '爽泄';\n  if (resistance >= 15) return '登仙';\n  if (resistance >= 1) return '纵欲';\n  return '欢愉';\n};\n\n// 定义部位等级推导逻辑\nconst getPartLevel = (value) => {\n  return Math.floor(value / 100);\n};\n\n// 角色通用Schema结构\nconst CharacterSchema = z.object({\n  好感与爱意: z.object({\n    好感度: z.number().prefault(0),\n    好感度转化状态: z.number().prefault(0),\n    爱意值: z.number().prefault(0),\n    爱意等级: z.number().prefault(0),\n    _爱意阶段称号: z.string().prefault('友善')\n  }).transform(data => {\n    data._爱意阶段称号 = getLoveTitle(data.爱意等级);\n    return data;\n  }),\n  \n  敏感度与境界: z.object({\n    圆融计数: z.number().prefault(0),\n    当前敏感度等级: z.string().prefault('青涩'),\n    _已解锁最高敏感度: z.string().prefault('青涩'),\n    敏感度进度条: z.number().prefault(0),\n    _生理抗性: z.number().prefault(100),\n    红鸾境界: z.enum(['锁灵', '玉润', '星衍', '蕴灵', '灵融', '众妙']).prefault('锁灵')\n  }).transform(data => {\n    data._生理抗性 = getResistance(data.圆融计数);\n    data._已解锁最高敏感度 = getSensitivityLevel(data._生理抗性);\n    // 如果当前等级未手动设置，则默认跟随最高等级\n    if (!data.当前敏感度等级 || data.当前敏感度等级 === '青涩' && data._生理抗性 < 97) {\n        data.当前敏感度等级 = data._已解锁最高敏感度;\n    }\n    return data;\n  }),\n\n  多维行为检测: z.object({\n    乳星: z.number().prefault(0),\n    孕灵状态: z.string().prefault('期待'),\n    诞灵次数: z.number().prefault(0),\n    共鸣次数: z.number().prefault(0),\n    感官过载次数: z.number().prefault(0)\n  }),\n\n  部位进化: z.object({\n    香舌: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),\n    奶子: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),\n    小穴: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),\n    菊蕊: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') })\n  }).transform(data => {\n    data.香舌._Lv = getPartLevel(data.香舌.数值);\n    data.奶子._Lv = getPartLevel(data.奶子.数值);\n    data.小穴._Lv = getPartLevel(data.小穴.数值);\n    data.菊蕊._Lv = getPartLevel(data.菊蕊.数值);\n    return data;\n  }),\n\n  体液状态: z.object({\n    津液: z.string().prefault('湿润拉丝'),\n    腋下清汗: z.string().prefault('干爽'),\n    足汗油膏: z.string().prefault('干爽'),\n    醇湿仙元: z.string().prefault('尚未动情'),\n    骚香灵泉: z.string().prefault('紧闭'),\n    兰露肠液: z.string().prefault('干涩')\n  }),\n\n  体味旋律: z.object({\n    体香: z.string().prefault('无'),\n    体液香: z.string().prefault('无'),\n    临时体香: z.string().prefault('无'),\n    口感: z.string().prefault('无')\n  }),\n\n  装备与心理: z.object({\n    上身: z.string().prefault('无'),\n    下身: z.string().prefault('无'),\n    内衣: z.string().prefault('无'),\n    内裤: z.string().prefault('无'),\n    美腿: z.string().prefault('裸露'),\n    玉足: z.string().prefault('赤足'),\n    配饰: z.array(z.string()).prefault(['无','无','无','无','无','无','无','无']),\n    性癖档案: z.array(z.string()).prefault(['未觉醒','未觉醒','未觉醒','未觉醒','未觉醒','未觉醒']),\n    实时内心: z.string().prefault('很期待接下来发生的事')\n  })\n});\n\nexport const Schema = z.object({\n  全局: z.object({\n    时间: z.object({\n      年: z.number().prefault(0),\n      月: z.number().prefault(4),\n      日: z.number().prefault(20),\n      时: z.number().prefault(9),\n      分: z.number().prefault(30),\n      星期: z.string().prefault('周三')\n    }),\n    资源: z.object({\n      现金: z.number().prefault(500),\n      积分: z.number().prefault(10)\n    }),\n    地点: z.string().prefault('堡垒顶层居住区')\n  }),\n  角色: z.object({\n    苏瑶: CharacterSchema,\n    叶婉秋: CharacterSchema,\n    苏双双: CharacterSchema\n  })\n});\n// 境界突破需要用户主动指令与剧情描写，取消Zod静默自动升级，交由AI根据规则更新\n\n$(() => {\n  registerMvuSchema(Schema);\n});",
-  "info": "用于定义苏瑶及其他角色的MVU Zod变量与演化逻辑。",
-  "button": {
-    "enabled": true,
-    "buttons": []
-  },
-  "data": {},
-  "export_with": {
-    "data": true,
-    "button": true
-  }
-}
+import { registerMvuSchema } from 'https://testingcf.jsdelivr.net/gh/StageDog/tavern_resource/dist/util/mvu_zod.js';
+
+// 定义爱意称号推导逻辑
+const getLoveTitle = (lv) => {
+  if (lv < 1) return '友善';
+  if (lv < 10) return '暗恋';
+  if (lv < 20) return '初恋';
+  if (lv < 30) return '热恋';
+  if (lv < 40) return '眷恋';
+  if (lv < 50) return '依恋';
+  if (lv < 60) return '深爱';
+  if (lv < 70) return '病娇';
+  if (lv < 80) return '生死相依';
+  if (lv < 90) return '灵魂伴侣';
+  if (lv < 100) return '永恒契约';
+  if (lv < 110) return '终极归宿';
+  return '真爱化身';
+};
+
+// 定义生理抗性推导逻辑 (线性递减)
+const getResistance = (count) => {
+  return Math.max(0, 100 - count);
+};
+
+// 定义敏感度级别推导逻辑 (基于生理抗性)
+const getSensitivityLevel = (resistance) => {
+  if (resistance >= 97) return '青涩';
+  if (resistance >= 91) return '觉醒';
+  if (resistance >= 85) return '渴求';
+  if (resistance >= 80) return '失控';
+  if (resistance >= 74) return '享乐';
+  if (resistance >= 65) return '纵情';
+  if (resistance >= 60) return '畅爽';
+  if (resistance >= 50) return '绝巅';
+  if (resistance >= 35) return '爽泄';
+  if (resistance >= 15) return '登仙';
+  if (resistance >= 1) return '纵欲';
+  return '欢愉';
+};
+
+// 定义部位等级推导逻辑
+const getPartLevel = (value) => {
+  return Math.floor(value / 100);
+};
+
+// 角色通用Schema结构
+const CharacterSchema = z.object({
+  好感与爱意: z.object({
+    好感度: z.number().prefault(0),
+    好感度转化状态: z.number().prefault(0),
+    爱意值: z.number().prefault(0),
+    爱意等级: z.number().prefault(0),
+    _爱意阶段称号: z.string().prefault('友善')
+  }).transform(data => {
+    data._爱意阶段称号 = getLoveTitle(data.爱意等级);
+    return data;
+  }),
+  
+  敏感度与境界: z.object({
+    圆融计数: z.number().prefault(0),
+    当前敏感度等级: z.string().prefault('青涩'),
+    _已解锁最高敏感度: z.string().prefault('青涩'),
+    敏感度进度条: z.number().prefault(0),
+    _生理抗性: z.number().prefault(100),
+    红鸾境界: z.enum(['锁灵', '玉润', '星衍', '蕴灵', '灵融', '众妙']).prefault('锁灵')
+  }).transform(data => {
+    data._生理抗性 = getResistance(data.圆融计数);
+    data._已解锁最高敏感度 = getSensitivityLevel(data._生理抗性);
+    // 如果当前等级未手动设置，则默认跟随最高等级
+    if (!data.当前敏感度等级 || data.当前敏感度等级 === '青涩' && data._生理抗性 < 97) {
+        data.当前敏感度等级 = data._已解锁最高敏感度;
+    }
+    return data;
+  }),
+
+  多维行为检测: z.object({
+    乳星: z.number().prefault(0),
+    孕灵状态: z.string().prefault('期待'),
+    诞灵次数: z.number().prefault(0),
+    共鸣次数: z.number().prefault(0),
+    感官过载次数: z.number().prefault(0)
+  }),
+
+  部位进化: z.object({
+    香舌: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),
+    奶子: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),
+    小穴: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') }),
+    菊蕊: z.object({ 数值: z.number().prefault(0), _Lv: z.number().prefault(0), 状态: z.string().prefault('未开发'), 强化部位1: z.string().prefault('无'), 强化部位2: z.string().prefault('无') })
+  }).transform(data => {
+    data.香舌._Lv = getPartLevel(data.香舌.数值);
+    data.奶子._Lv = getPartLevel(data.奶子.数值);
+    data.小穴._Lv = getPartLevel(data.小穴.数值);
+    data.菊蕊._Lv = getPartLevel(data.菊蕊.数值);
+    return data;
+  }),
+
+  体液状态: z.object({
+    津液: z.string().prefault('湿润拉丝'),
+    腋下清汗: z.string().prefault('干爽'),
+    足汗油膏: z.string().prefault('干爽'),
+    醇湿仙元: z.string().prefault('尚未动情'),
+    骚香灵泉: z.string().prefault('紧闭'),
+    兰露肠液: z.string().prefault('干涩')
+  }),
+
+  体味旋律: z.object({
+    体香: z.string().prefault('无'),
+    体液香: z.string().prefault('无'),
+    临时体香: z.string().prefault('无'),
+    口感: z.string().prefault('无')
+  }),
+
+  装备与心理: z.object({
+    上身: z.string().prefault('无'),
+    下身: z.string().prefault('无'),
+    内衣: z.string().prefault('无'),
+    内裤: z.string().prefault('无'),
+    美腿: z.string().prefault('裸露'),
+    玉足: z.string().prefault('赤足'),
+    配饰: z.array(z.string()).prefault(['无','无','无','无','无','无','无','无']),
+    性癖档案: z.array(z.string()).prefault(['未觉醒','未觉醒','未觉醒','未觉醒','未觉醒','未觉醒']),
+    实时内心: z.string().prefault('很期待接下来发生的事')
+  })
+});
+
+export const Schema = z.object({
+  全局: z.object({
+    时间: z.object({
+      年: z.number().prefault(0),
+      月: z.number().prefault(4),
+      日: z.number().prefault(20),
+      时: z.number().prefault(9),
+      分: z.number().prefault(30),
+      星期: z.string().prefault('周三')
+    }),
+    资源: z.object({
+      现金: z.number().prefault(500),
+      积分: z.number().prefault(10)
+    }),
+    地点: z.string().prefault('堡垒顶层居住区')
+  }),
+  角色: z.object({
+    苏瑶: CharacterSchema,
+    叶婉秋: CharacterSchema,
+    苏双双: CharacterSchema
+  })
+});
+// 境界突破需要用户主动指令与剧情描写，取消Zod静默自动升级，交由AI根据规则更新
+
+$(() => {
+  registerMvuSchema(Schema);
+});
